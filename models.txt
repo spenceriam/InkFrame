@@ -1,0 +1,33 @@
+# Waveshare E-Paper Display Model Reference
+
+If you're unsure which model of e-ink display you have, here's a list of commonly used models:
+
+## Available Models
+
+- 1.54 inch (152×152): `epd1in54`
+- 1.54 inch V2 (200×200): `epd1in54_V2`
+- 2.13 inch (122×250): `epd2in13`
+- 2.13 inch V2 (122×250): `epd2in13_V2`
+- 2.7 inch (176×264): `epd2in7`
+- 2.9 inch (128×296): `epd2in9`
+- 4.2 inch (400×300): `epd4in2`
+- 5.83 inch (600×448): `epd5in83`
+- 5.83 inch V2 (648×480): `epd5in83_V2`
+- 7.5 inch (640×384): `epd7in5`
+- 7.5 inch V2 (800×480): `epd7in5_V2`
+
+## How to Use
+
+In the test_display.py script, change the import line to match your model:
+
+```python
+# For example, if you have a 7.5 inch V2 display:
+from waveshare_epd import epd7in5_V2 as epd
+
+# Or if you have a 2.9 inch display:
+from waveshare_epd import epd2in9 as epd
+```
+
+## Identifying Your Display
+
+The model number is typically printed on the display board or packaging. You can also identify it by measuring the screen dimensions and matching them to the sizes above.

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InkFrame - E-Ink Photo Frame Manager</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="icon" href="/static/images/favicon.ico">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>InkFrame</h1>
+            <div class="subtitle">E-Ink Photo Frame Manager</div>
+        </header>
+
+        <nav>
+            <ul class="tabs">
+                <li class="tab active" data-tab="photos">Photos</li>
+                <li class="tab" data-tab="settings">Settings</li>
+                <li class="tab" data-tab="system">System</li>
+            </ul>
+        </nav>
+
+        <main>
+            <!-- Photos Tab -->
+            <section id="photos" class="tab-content active">
+                <div class="content-header">
+                    <h2>Photo Management</h2>
+                    <button id="refresh-display" class="button primary">Refresh Display</button>
+                </div>
+
+                <div class="upload-section">
+                    <div id="dropzone" class="dropzone">
+                        <div class="dropzone-content">
+                            <p>Drag photos here or click to upload</p>
+                            <p class="small">Supports JPG, PNG, BMP, HEIC</p>
+                        </div>
+                        <input type="file" id="file-input" multiple accept=".jpg,.jpeg,.png,.bmp,.heic,.heif">
+                    </div>
+                    <div id="upload-progress" class="upload-progress hidden">
+                        <div class="progress-bar">
+                            <div class="progress-fill"></div>
+                        </div>
+                        <div class="progress-text">Uploading... 0%</div>
+                    </div>
+                </div>
+
+                <div class="photo-gallery">
+                    <div id="photos-container" class="photos-container">
+                        <!-- Photos will be loaded here dynamically -->
+                        <div class="loading">Loading photos...</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Tab -->
+            <section id="settings" class="tab-content">
+                <div class="content-header">
+                    <h2>Settings</h2>
+                    <button id="save-settings" class="button primary">Save Settings</button>
+                </div>
+
+                <div class="settings-form">
+                    <h3>Display Settings</h3>
+                    <div class="form-group">
+                        <label for="rotation-interval">Photo Rotation Interval (minutes)</label>
+                        <input type="number" id="rotation-interval" min="1" max="1440">
+                    </div>
+                    <div class="form-group">
+                        <label for="enable-dithering">Enable Image Dithering</label>
+                        <input type="checkbox" id="enable-dithering">
+                        <span class="help-text">Dithering improves grayscale appearance on e-ink displays</span>
+                    </div>
+
+                    <h3>Time & Weather</h3>
+                    <div class="form-group">
+                        <label for="timezone">Timezone</label>
+                        <select id="timezone">
+                            <!-- Timezone options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="weather-city">City</label>
+                        <input type="text" id="weather-city" placeholder="London">
+                    </div>
+                    <div class="form-group">
+                        <label for="weather-state">State/Province (optional)</label>
+                        <input type="text" id="weather-state" placeholder="Optional">
+                    </div>
+                    <div class="form-group">
+                        <label for="weather-country">Country Code</label>
+                        <input type="text" id="weather-country" placeholder="UK">
+                    </div>
+                    <div class="form-group">
+                        <label for="weather-units">Temperature Units</label>
+                        <select id="weather-units">
+                            <option value="metric">Celsius</option>
+                            <option value="imperial">Fahrenheit</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="weather-api-key">OpenWeatherMap API Key</label>
+                        <input type="text" id="weather-api-key" placeholder="Enter your API key">
+                        <span class="help-text">Get a free API key at <a href="https://openweathermap.org/api" target="_blank">openweathermap.org</a></span>
+                    </div>
+                    <button id="test-weather" class="button secondary">Test Weather Data</button>
+                    <div id="weather-result" class="weather-result hidden"></div>
+                </div>
+            </section>
+
+            <!-- System Tab -->
+            <section id="system" class="tab-content">
+                <div class="content-header">
+                    <h2>System Information</h2>
+                    <button id="refresh-status" class="button primary">Refresh Status</button>
+                </div>
+
+                <div class="system-info">
+                    <div class="info-card">
+                        <h3>Storage</h3>
+                        <div class="disk-usage">
+                            <div class="disk-bar">
+                                <div class="disk-fill" style="width: 0%"></div>
+                            </div>
+                            <div class="disk-text">Loading...</div>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <h3>Display Service</h3>
+                        <div class="service-status">
+                            <div class="status-indicator">
+                                <span class="indicator"></span>
+                                <span class="status-text">Checking...</span>
+                            </div>
+                            <button id="start-service" class="button secondary">Start Service</button>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <h3>System Information</h3>
+                        <div class="system-details">
+                            <div class="info-row">
+                                <span class="info-label">Uptime:</span>
+                                <span class="info-value" id="uptime">Loading...</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">CPU Temperature:</span>
+                                <span class="info-value" id="cpu-temp">Loading...</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Photos:</span>
+                                <span class="info-value" id="photo-count">Loading...</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Last Update:</span>
+                                <span class="info-value" id="last-update">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-card logs-card">
+                        <h3>System Logs</h3>
+                        <pre id="system-logs" class="system-logs">Loading logs...</pre>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <div>InkFrame &copy; 2023</div>
+        </footer>
+    </div>
+
+    <!-- Templates -->
+    <template id="photo-template">
+        <div class="photo-item">
+            <div class="photo-preview">
+                <img src="" alt="">
+            </div>
+            <div class="photo-info">
+                <div class="photo-name"></div>
+                <div class="photo-date"></div>
+            </div>
+            <div class="photo-actions">
+                <button class="button small delete-photo">Delete</button>
+            </div>
+        </div>
+    </template>
+
+    <!-- Notification System -->
+    <div id="notifications" class="notifications"></div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

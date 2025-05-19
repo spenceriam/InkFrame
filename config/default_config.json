@@ -1,0 +1,28 @@
+{
+  "display": {
+    "rotation_interval_minutes": 60,
+    "status_bar_height": 40,
+    "enable_dithering": true
+  },
+  "photos": {
+    "directory": "static/images/photos",
+    "max_width": 800,
+    "max_height": 440,
+    "format": "bmp"
+  },
+  "weather": {
+    "api_key": "",
+    "city": "",
+    "state": "",
+    "country": "",
+    "units": "metric",
+    "update_interval_minutes": 30,
+    "cache_expiry_minutes": 120
+  },
+  "system": {
+    "timezone": "UTC",
+    "web_port": 5000,
+    "debug_mode": false,
+    "log_level": "INFO"
+  }
+}

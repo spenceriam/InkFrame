@@ -1,0 +1,8 @@
+flask==2.2.3
+pillow==9.4.0
+requests==2.28.2
+pytz==2022.7.1
+gunicorn==20.1.0
+werkzeug==2.2.3
+RPi.GPIO==0.7.1; platform_system == "Linux" and platform_machine == "armv6l"
+spidev==3.6; platform_system == "Linux" and platform_machine == "armv6l"

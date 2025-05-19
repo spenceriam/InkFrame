@@ -29,9 +29,9 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, project_root)
 
 # Import application modules
-from utils.config_manager import ConfigManager
-from display.photo_manager import PhotoManager
-from web.app import app as flask_app
+from src.utils.config_manager import ConfigManager
+from src.display.photo_manager import PhotoManager
+from src.web.app import app as flask_app
 
 def run_display():
     """Run the photo display component"""

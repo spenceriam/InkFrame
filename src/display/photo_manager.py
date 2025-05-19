@@ -22,8 +22,8 @@ from datetime import datetime, timedelta
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from enum import Enum
 
-from display.eink_driver import EInkDisplay
-from weather.weather_client import WeatherClient
+from src.display.eink_driver import EInkDisplay
+from src.weather.weather_client import WeatherClient
 
 logger = logging.getLogger(__name__)
 

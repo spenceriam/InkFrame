@@ -18,10 +18,10 @@ from flask import Flask, request, jsonify, render_template, send_from_directory
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from utils.config_manager import ConfigManager
-from utils.image_processor import ImageProcessor
-from display.photo_manager import PhotoManager
-from weather.weather_client import WeatherClient
+from src.utils.config_manager import ConfigManager
+from src.utils.image_processor import ImageProcessor
+from src.display.photo_manager import PhotoManager
+from src.weather.weather_client import WeatherClient
 
 # Configure logging
 logging.basicConfig(

@@ -8,9 +8,10 @@ import sys
 import time
 import traceback
 
-# Models to try, in order of likelihood for 7.5" displays
+# Models to try, in order of likelihood for 7.3-7.5" displays
 MODELS_TO_TRY = [
     ("epd7in5_V2", "7.5 inch V2 (800×480)"),
+    ("epd7in3f", "7.3 inch ACeP 7-Color (800×480)"),
     ("epd7in5", "7.5 inch (640×384)"),
     ("epd7in5_HD", "7.5 inch HD"),
     ("epd7in5b_V2", "7.5 inch B/W/Red V2")
@@ -47,19 +48,59 @@ def test_model(module_name, display_name):
         print("Creating test image...")
         from PIL import Image, ImageDraw, ImageFont
         
-        # Get dimensions from the object, not the module (more reliable)
-        image = Image.new('1', (epd.width, epd.height), 255)
-        draw = ImageDraw.Draw(image)
+        # Determine if this is a color display
+        is_color_display = "f" in module_name.lower()  # ACeP models have 'f' suffix
         
-        # Draw a border and text
-        draw.rectangle([(0, 0), (epd.width-1, epd.height-1)], outline=0)
-        font = ImageFont.load_default()
-        text = f"Model: {module_name}"
-        draw.text((epd.width//4, epd.height//2), text, font=font, fill=0)
+        if is_color_display:
+            # For color displays, create RGB image
+            print("Creating color test image...")
+            image = Image.new('RGB', (epd.width, epd.height), (255, 255, 255))
+            draw = ImageDraw.Draw(image)
+            
+            # Draw color blocks
+            colors = [
+                (0, 0, 0),      # Black
+                (255, 0, 0),    # Red
+                (0, 255, 0),    # Green
+                (0, 0, 255),    # Blue
+                (255, 255, 0),  # Yellow
+                (255, 128, 0)   # Orange
+            ]
+            
+            block_width = epd.width // len(colors)
+            for i, color in enumerate(colors):
+                x1 = i * block_width
+                x2 = (i + 1) * block_width
+                draw.rectangle([(x1, 100), (x2, 300)], fill=color)
+            
+            # Draw border and text
+            draw.rectangle([(0, 0), (epd.width-1, epd.height-1)], outline=(0, 0, 0))
+            font = ImageFont.load_default()
+            text = f"7-Color Model: {module_name}"
+            draw.text((epd.width//4, epd.height//2 + 100), text, font=font, fill=(0, 0, 0))
+        else:
+            # For B&W displays, create 1-bit image
+            image = Image.new('1', (epd.width, epd.height), 255)
+            draw = ImageDraw.Draw(image)
+            
+            # Draw a border and text
+            draw.rectangle([(0, 0), (epd.width-1, epd.height-1)], outline=0)
+            font = ImageFont.load_default()
+            text = f"Model: {module_name}"
+            draw.text((epd.width//4, epd.height//2), text, font=font, fill=0)
         
         # Display image
         print("Displaying test image...")
-        epd.display(epd.getbuffer(image))
+        
+        # Update based on display type
+        if is_color_display:
+            print("Using color display method...")
+            # ACeP color displays use a different buffer method
+            epd.display(epd.getbuffer(image))
+        else:
+            # Standard B&W or grayscale displays
+            epd.display(epd.getbuffer(image))
+            
         print("Image displayed!")
         
         # Wait and sleep

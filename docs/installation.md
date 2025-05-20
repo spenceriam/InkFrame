@@ -1,11 +1,13 @@
 # InkFrame Installation Guide
 
-This guide covers the complete installation process for InkFrame on a Raspberry Pi Zero W with a Waveshare 7.5" e-ink display.
+This guide covers the complete installation process for InkFrame on a Raspberry Pi Zero W with a Waveshare e-ink display.
 
 ## Hardware Requirements
 
 - Raspberry Pi Zero W
-- Waveshare 7.5" e-ink display with HAT
+- Waveshare e-ink display with HAT (choose one):
+  - 7.5" black and white/grayscale e-ink display
+  - 7.3" ACeP 7-color e-ink display
 - MicroSD card (8GB or larger recommended)
 - Power supply for Raspberry Pi (5V/2.5A recommended)
 - Computer with SD card reader for initial setup
@@ -137,6 +139,42 @@ You should see `spi_bcm2835` in the output. If not, enable SPI:
 3. Select "SPI"
 4. Select "Yes" to enable the SPI interface
 5. Reboot the Raspberry Pi
+
+### Setting Up for 7.3 inch ACeP 7-Color Display
+
+If you're using the 7.3 inch ACeP 7-color display instead of the 7.5 inch B&W display:
+
+1. Determine your exact display model:
+   ```
+   cd ~/InkFrame
+   python check_model.py
+   ```
+   This script will test different display models and identify which one works with your hardware.
+
+2. Run the color-specific test script:
+   ```
+   python color_test.py
+   ```
+   This will display a color test pattern showing all 7 available colors.
+
+3. Update your configuration:
+   ```
+   nano config/default_config.json
+   ```
+   
+   Add these settings in the "display" section:
+   ```json
+   "display_type": "7in3f",
+   "color_mode": "color"
+   ```
+   
+   Save and exit (Ctrl+O, Enter, Ctrl+X).
+
+4. Important notes for 7.3 inch ACeP display:
+   - Refresh time is approximately 35 seconds (vs. 1-2 seconds for B&W)
+   - Full 7-color support requires specific RGB values (see models.txt)
+   - Higher power consumption during refresh
+   - To avoid damaging the display, set reasonable refresh intervals (5+ minutes)
 
 ### Service Issues
 

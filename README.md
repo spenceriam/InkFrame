@@ -1,6 +1,6 @@
 # InkFrame
 
-A minimal, elegant digital photo frame using a Raspberry Pi Zero W and Waveshare 7.5" e-ink display.
+A minimal, elegant digital photo frame using a Raspberry Pi Zero W and Waveshare e-ink display.
 
 <p align="center">
   <img src="docs/images/preview.png" alt="InkFrame Preview" width="600"><br>
@@ -9,7 +9,7 @@ A minimal, elegant digital photo frame using a Raspberry Pi Zero W and Waveshare
 
 ## Features
 
-- **Beautiful E-ink Display**: Optimized grayscale images on a 7.5" Waveshare e-ink display
+- **Beautiful E-ink Display**: Support for both monochrome/grayscale (7.5") and full color (7.3" ACeP) displays
 - **Auto-Cycling Photos**: Configurable rotation interval for changing displayed photos
 - **Status Bar**: Shows current time and local weather information
 - **Web Interface**: Simple browser-based management interface for photos and settings
@@ -21,7 +21,9 @@ A minimal, elegant digital photo frame using a Raspberry Pi Zero W and Waveshare
 ## Hardware Requirements
 
 - Raspberry Pi Zero W
-- Waveshare 7.5" e-ink display with HAT
+- Waveshare e-ink display with HAT:
+  - 7.5" black and white/grayscale e-ink display (faster refresh, lower power)
+  - **OR** 7.3" ACeP 7-color e-ink display (for vibrant color photos, slower refresh)
 - microSD card (8GB+ recommended)
 - Power supply for Raspberry Pi
 

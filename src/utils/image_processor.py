@@ -5,7 +5,7 @@ Handles image conversion, resizing, and optimization for e-ink display.
 
 Features:
 - Converts images to optimal format for e-ink display
-- Supports both 1-bit (black/white) and 4-level grayscale
+- Supports 1-bit (black/white), 4-level grayscale, and 7-color ACeP modes
 - Enhances contrast and brightness for better e-ink visibility
 - Multiple dithering algorithms for improved visual quality
 - Handles HEIC format conversion via ImageMagick
@@ -39,7 +39,8 @@ class ImageProcessor:
         self.max_height = config["photos"]["max_height"]
         self.enable_dithering = config["display"].get("enable_dithering", True)
         self.output_format = config["photos"].get("format", "bmp").lower()
-        self.grayscale_mode = config["display"].get("grayscale_mode", True)
+        self.color_mode = config["display"].get("color_mode", "grayscale")
+        self.grayscale_mode = self.color_mode == "grayscale"  # For backward compatibility
         self.dithering_method = config["display"].get("dithering_method", "floydsteinberg")
         self.contrast_factor = config["display"].get("contrast_factor", 1.5)
         self.brightness_factor = config["display"].get("brightness_factor", 1.2)
@@ -56,6 +57,17 @@ class ImageProcessor:
             "ordered": Image.Dither.ORDERED,
             "rasterize": Image.Dither.RASTERIZE
         }
+        
+        # Define the 7-color palette for ACeP display
+        self.acep_colors = [
+            (0, 0, 0),      # Black
+            (255, 255, 255), # White
+            (0, 255, 0),    # Green
+            (0, 0, 255),    # Blue
+            (255, 0, 0),    # Red
+            (255, 255, 0),  # Yellow
+            (255, 128, 0)   # Orange
+        ]
     
     def _has_imagemagick(self):
         """Check if ImageMagick is installed"""
@@ -100,12 +112,12 @@ class ImageProcessor:
         2. Resize to fit display
         3. Apply image enhancement (contrast, brightness, sharpness)
         4. Apply optional filters for better e-ink visibility
-        5. Convert to appropriate format (B&W or grayscale) with optional dithering
+        5. Convert to appropriate format (B&W, grayscale, or color) with optional dithering
         
         Args:
             input_path (str): Path to input image file
             output_path (str, optional): Path to save processed image
-            mode (str, optional): Override processing mode ('bw' or 'grayscale')
+            mode (str, optional): Override processing mode ('bw', 'grayscale', or 'color')
             
         Returns:
             str: Path to processed image, or None if processing failed
@@ -140,24 +152,35 @@ class ImageProcessor:
                 
             image = image.resize((new_width, new_height), Image.Resampling.LANCZOS)
             
-            # Convert to grayscale for processing
-            image = image.convert('L')
+            # Process based on mode (color, grayscale, or black & white)
+            process_mode = mode if mode else self.color_mode
             
-            # Apply image enhancements for better e-ink visibility
-            image = self._enhance_image(image)
-            
-            # Apply additional filtering to improve appearance on e-ink
-            image = self._apply_eink_optimizations(image)
-            
-            # Process based on mode (grayscale or black & white)
-            use_grayscale = mode == 'grayscale' if mode else self.grayscale_mode
-            
-            if use_grayscale:
-                # Process for 4-level grayscale mode
-                processed_image = self._process_grayscale(image)
+            if process_mode == 'color':
+                # Keep as RGB for color processing
+                if image.mode != 'RGB':
+                    image = image.convert('RGB')
+                    
+                # Apply color-appropriate enhancements
+                image = self._enhance_color_image(image)
+                
+                # Process for 7-color ACeP display
+                processed_image = self._process_color(image)
             else:
-                # Process for 1-bit black and white mode
-                processed_image = self._process_black_white(image)
+                # Convert to grayscale for B&W or grayscale processing
+                image = image.convert('L')
+                
+                # Apply image enhancements for better e-ink visibility
+                image = self._enhance_image(image)
+                
+                # Apply additional filtering to improve appearance on e-ink
+                image = self._apply_eink_optimizations(image)
+                
+                if process_mode == 'grayscale':
+                    # Process for 4-level grayscale mode
+                    processed_image = self._process_grayscale(image)
+                else:
+                    # Process for 1-bit black and white mode
+                    processed_image = self._process_black_white(image)
             
             # Save the processed image
             processed_image.save(output_path)
@@ -240,6 +263,71 @@ class ImageProcessor:
             # Manual quantization without dithering
             lut = [0] * 64 + [85] * 64 + [170] * 64 + [255] * 64
             image = image.point(lambda p: lut[min(255, p) // 4])
+        
+        return image
+    
+    def _enhance_color_image(self, image):
+        """Apply image enhancements for color e-ink display
+        
+        Args:
+            image (PIL.Image): Color image to enhance
+            
+        Returns:
+            PIL.Image: Enhanced color image
+        """
+        # Enhance contrast
+        if self.contrast_factor != 1.0:
+            enhancer = ImageEnhance.Contrast(image)
+            image = enhancer.enhance(self.contrast_factor)
+        
+        # Enhance saturation (for color displays, slightly increased saturation helps)
+        enhancer = ImageEnhance.Color(image)
+        image = enhancer.enhance(1.3)  # Slightly boost colors
+        
+        # Enhance brightness
+        if self.brightness_factor != 1.0:
+            enhancer = ImageEnhance.Brightness(image)
+            image = enhancer.enhance(self.brightness_factor)
+        
+        # Enhance sharpness
+        if self.sharpness_factor != 1.0:
+            enhancer = ImageEnhance.Sharpness(image)
+            image = enhancer.enhance(self.sharpness_factor)
+            
+        return image
+
+    def _process_color(self, image):
+        """Process image for 7-color ACeP e-ink display
+        
+        Args:
+            image (PIL.Image): RGB image to process
+            
+        Returns:
+            PIL.Image: Processed image for 7-color ACeP display
+        """
+        # Create a palette image with the 7 colors available on the ACeP display
+        palette_image = Image.new('P', (1, 1))
+        palette_data = []
+        for color in self.acep_colors:
+            palette_data.extend(color)
+        # Fill the rest of the palette with zeros
+        while len(palette_data) < 768:  # 256 * 3 colors
+            palette_data.extend([0, 0, 0])
+            
+        # Set the palette
+        palette_image.putpalette(palette_data)
+        
+        # Apply dithering if enabled
+        if self.enable_dithering:
+            dither_method = self.dithering_methods.get(self.dithering_method)
+            # Convert to palette mode with dithering
+            image = image.quantize(colors=len(self.acep_colors), palette=palette_image, dither=dither_method)
+        else:
+            # Convert to palette mode without dithering
+            image = image.quantize(colors=len(self.acep_colors), palette=palette_image)
+        
+        # Convert to RGB for saving (needed for some formats)
+        image = image.convert('RGB')
         
         return image
     
@@ -359,7 +447,7 @@ if __name__ == "__main__":
     config = {
         "display": {
             "enable_dithering": True,
-            "grayscale_mode": True,
+            "color_mode": "grayscale",  # 'bw', 'grayscale', or 'color'
             "dithering_method": "floydsteinberg",
             "contrast_factor": 1.5,
             "brightness_factor": 1.2,
@@ -380,8 +468,7 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="Process images for e-ink display")
     parser.add_argument("input", help="Input image file")
-    parser.add_argument("--bw", action="store_true", help="Force black and white mode")
-    parser.add_argument("--gray", action="store_true", help="Force grayscale mode")
+    parser.add_argument("--mode", choices=["bw", "grayscale", "color"], default="grayscale", help="Processing mode")
     parser.add_argument("--nodither", action="store_true", help="Disable dithering")
     parser.add_argument("--filter", choices=["sketch", "edges", "emboss", "posterize"], 
                       help="Apply a specialty filter")
@@ -391,10 +478,8 @@ if __name__ == "__main__":
         
         if os.path.exists(args.input):
             # Override config settings based on arguments
-            if args.bw:
-                config["display"]["grayscale_mode"] = False
-            elif args.gray:
-                config["display"]["grayscale_mode"] = True
+            if args.mode:
+                config["display"]["color_mode"] = args.mode
                 
             if args.nodither:
                 config["display"]["enable_dithering"] = False
@@ -403,8 +488,7 @@ if __name__ == "__main__":
             processor = ImageProcessor(config)
             
             # Process the image
-            mode = "bw" if args.bw else "grayscale" if args.gray else None
-            result_path = processor.preprocess_image(args.input, mode=mode)
+            result_path = processor.preprocess_image(args.input, mode=args.mode)
             
             # Apply specialty filter if requested
             if args.filter and result_path:

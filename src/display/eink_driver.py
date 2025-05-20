@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-E-Ink display driver for Waveshare 7.5" e-ink display.
+E-Ink display driver for Waveshare e-ink displays.
 Handles initialization, display updates, and cleanup.
 
 Features:
-- Supports both black/white and grayscale display
+- Supports multiple display types: B&W, grayscale, and 7-color ACeP
 - Handles full and partial refresh modes
 - Provides simulation mode for development without hardware
 - Built-in error handling and graceful degradation
@@ -18,43 +18,77 @@ import time
 # This try/except allows for development on non-Raspberry Pi systems
 try:
     # For Waveshare e-Paper HAT
-    from waveshare_epd import epd7in5_V2 as epd7in5
-    SIMULATION_MODE = False
+    import importlib
+    
+    # Define supported display drivers
+    SUPPORTED_DRIVERS = {
+        "7in5_V2": "epd7in5_V2",   # 7.5 inch B/W V2 (800×480)
+        "7in3f": "epd7in3f"        # 7.3 inch ACeP 7-color (800×480)
+    }
+    
+    # Try to import available drivers
+    display_modules = {}
+    for key, module_name in SUPPORTED_DRIVERS.items():
+        try:
+            display_modules[key] = importlib.import_module(f"waveshare_epd.{module_name}")
+        except ImportError:
+            logging.warning(f"Could not import {module_name}")
+    
+    SIMULATION_MODE = len(display_modules) == 0
+    
+    if SIMULATION_MODE:
+        logging.warning("No Waveshare EPD drivers found, running in simulation mode")
+    else:
+        logging.info(f"Found {len(display_modules)} Waveshare EPD drivers: {list(display_modules.keys())}")
 except ImportError:
     logging.warning("Waveshare EPD library not found, running in simulation mode")
     SIMULATION_MODE = True
+    display_modules = {}
 
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 logger = logging.getLogger(__name__)
 
 class EInkDisplay:
-    """Driver for Waveshare 7.5" e-Paper HAT
+    """Driver for Waveshare e-Paper HAT displays
     
-    This class provides an interface to the Waveshare 7.5" e-Paper display.
-    It supports both black & white and grayscale modes, as well as full and
+    This class provides an interface to Waveshare e-Paper displays.
+    It supports black & white, grayscale, and 7-color modes, as well as full and
     partial refresh patterns for optimal display quality and speed.
     """
     
-    def __init__(self, grayscale_mode=True):
+    def __init__(self, display_type="7in5_V2", color_mode="grayscale"):
         """Initialize the display
         
         Args:
-            grayscale_mode (bool): Whether to use grayscale mode (True) or black/white mode (False)
+            display_type (str): The display type to use ("7in5_V2" or "7in3f")
+            color_mode (str): The color mode to use ("bw", "grayscale", or "color")
         """
         self.width = 800
         self.height = 480
         self.epd = None
         self.initialized = False
-        self.grayscale_mode = grayscale_mode
+        self.display_type = display_type
+        self.color_mode = color_mode
+        self.is_color_display = display_type == "7in3f"  # 7in3f is the 7-color ACeP display
         self.last_full_refresh = 0  # Timestamp of last full refresh
         self.refresh_count = 0  # Count of partial refreshes since last full refresh
         
+        # For backwards compatibility
+        self.grayscale_mode = color_mode == "grayscale"
+        
         if not SIMULATION_MODE:
             try:
-                self.epd = epd7in5.EPD()
-                self.init_display()
-                self.initialized = True
+                # Get the appropriate display module
+                if display_type in display_modules:
+                    module = display_modules[display_type]
+                    self.epd = module.EPD()
+                    self.init_display()
+                    self.initialized = True
+                else:
+                    available = list(display_modules.keys())
+                    logger.error(f"Display type {display_type} not found. Available types: {available}")
+                    self.initialized = False
             except Exception as e:
                 logger.error(f"Failed to initialize display: {e}")
                 self.initialized = False
@@ -129,12 +163,16 @@ class EInkDisplay:
             if image.size != (self.width, self.height):
                 image = image.resize((self.width, self.height))
             
-            # Apply image processing based on display mode
-            if self.grayscale_mode:
+            # Apply image processing based on display type and color mode
+            if self.is_color_display:
+                # For 7-color ACeP display
+                if image.mode != 'RGB' and image.mode != 'RGBA':
+                    image = image.convert('RGB')
+                # No need to convert to palette mode here; the display driver does that
+            elif self.color_mode == "grayscale":
+                # For 4-level grayscale mode
                 if image.mode != 'L':
                     image = image.convert('L')  # Convert to grayscale
-                # Apply additional processing like dithering if needed
-                # image = ImageOps.dither(image)  # Uncomment if dithering is desired
             else:
                 # For 1-bit black and white mode
                 if image.mode != '1':
@@ -155,25 +193,32 @@ class EInkDisplay:
                                self.refresh_count >= 5 or \
                                (current_time - self.last_full_refresh) > 3600  # 1 hour
             
-            # Display the image with appropriate refresh mode
-            if needs_full_refresh:
-                logger.info("Performing full refresh")
-                if self.grayscale_mode:
-                    self.epd.display_4Gray(self.epd.getbuffer_4Gray(image))
-                else:
-                    self.epd.display(self.epd.getbuffer(image))
+            # Display the image with appropriate refresh mode based on display type and color mode
+            if self.is_color_display:  # 7.3 inch ACeP 7-color display
+                logger.info("Displaying on 7-color ACeP display")
+                # ACeP displays always need a full refresh
+                self.epd.display(self.epd.getbuffer(image))
                 self.last_full_refresh = current_time
                 self.refresh_count = 0
-            else:
-                logger.info("Performing partial refresh")
-                if self.grayscale_mode:
-                    # Some e-Paper displays don't support partial refresh in grayscale mode
-                    # Fall back to full refresh in grayscale mode
-                    self.epd.display_4Gray(self.epd.getbuffer_4Gray(image))
+            else:  # 7.5 inch black/white or grayscale display
+                if needs_full_refresh:
+                    logger.info("Performing full refresh")
+                    if self.color_mode == "grayscale":
+                        self.epd.display_4Gray(self.epd.getbuffer_4Gray(image))
+                    else:
+                        self.epd.display(self.epd.getbuffer(image))
+                    self.last_full_refresh = current_time
+                    self.refresh_count = 0
                 else:
-                    # Use partial refresh for black/white mode
-                    self.epd.display_Partial(self.epd.getbuffer(image))
-                self.refresh_count += 1
+                    logger.info("Performing partial refresh")
+                    if self.color_mode == "grayscale":
+                        # Some e-Paper displays don't support partial refresh in grayscale mode
+                        # Fall back to full refresh in grayscale mode
+                        self.epd.display_4Gray(self.epd.getbuffer_4Gray(image))
+                    else:
+                        # Use partial refresh for black/white mode
+                        self.epd.display_Partial(self.epd.getbuffer(image))
+                    self.refresh_count += 1
             
             logger.info("Displayed image from buffer")
             return True
@@ -312,11 +357,43 @@ if __name__ == "__main__":
     # Simple test when run directly
     logging.basicConfig(level=logging.INFO)
     
-    # Test in grayscale mode
-    display = EInkDisplay(grayscale_mode=True)
+    # Parse command line arguments for display type and color mode
+    import argparse
+    parser = argparse.ArgumentParser(description="Test the e-ink display")
+    parser.add_argument("--display", choices=["7in5_V2", "7in3f"], default="7in5_V2", help="Display type")
+    parser.add_argument("--mode", choices=["bw", "grayscale", "color"], default="grayscale", help="Color mode")
+    args = parser.parse_args()
     
-    # Create a test image - grayscale gradient
-    if display.grayscale_mode:
+    # Create display with specified type and mode
+    display = EInkDisplay(display_type=args.display, color_mode=args.mode)
+    
+    # Create a test image based on the display type and color mode
+    if display.is_color_display:  # 7.3 inch ACeP 7-color display
+        # Create a color test image
+        image = Image.new('RGB', (display.width, display.height), (255, 255, 255))  # White background
+        draw = ImageDraw.Draw(image)
+        
+        # Draw color blocks
+        colors = [
+            (0, 0, 0),      # Black
+            (255, 0, 0),    # Red
+            (0, 255, 0),    # Green
+            (0, 0, 255),    # Blue
+            (255, 255, 0),  # Yellow
+            (255, 128, 0)   # Orange
+        ]
+        
+        block_width = display.width // len(colors)
+        for i, color in enumerate(colors):
+            x1 = i * block_width
+            x2 = (i + 1) * block_width
+            draw.rectangle([(x1, 100), (x2, 300)], fill=color)
+        
+        # Draw text
+        font = ImageFont.truetype("FreeSans.ttf", 60) if os.path.exists("/usr/share/fonts/truetype/freefont/FreeSans.ttf") else ImageFont.load_default()
+        draw.text((150, 350), "7-Color E-Paper!", font=font, fill=(0, 0, 0))
+        
+    elif display.color_mode == "grayscale":  # Grayscale mode
         image = Image.new('L', (display.width, display.height), 255)  # 255: white
         draw = ImageDraw.Draw(image)
         
@@ -331,8 +408,8 @@ if __name__ == "__main__":
         # Draw some text
         font = ImageFont.truetype("FreeSans.ttf", 60) if os.path.exists("/usr/share/fonts/truetype/freefont/FreeSans.ttf") else ImageFont.load_default()
         draw.text((150, 200), "Hello E-Paper!", font=font, fill=50)  # Dark gray text
-    else:
-        # Black and white mode
+        
+    else:  # Black and white mode
         image = Image.new('1', (display.width, display.height), 255)  # 255: white
         draw = ImageDraw.Draw(image)
         draw.rectangle([(0, 0), (display.width - 1, display.height - 1)], outline=0)

@@ -4,6 +4,8 @@ If you're unsure which model of e-ink display you have, here's a list of commonl
 
 ## Available Models
 
+### Monochrome and Grayscale Models
+
 - 1.54 inch (152×152): `epd1in54`
 - 1.54 inch V2 (200×200): `epd1in54_V2`
 - 2.13 inch (122×250): `epd2in13`
@@ -16,7 +18,13 @@ If you're unsure which model of e-ink display you have, here's a list of commonl
 - 7.5 inch (640×384): `epd7in5`
 - 7.5 inch V2 (800×480): `epd7in5_V2`
 
+### Color Models
+
+- 7.3 inch ACeP 7-Color (800×480): `epd7in3f`
+
 ## How to Use
+
+### For Monochrome/Grayscale Displays
 
 In the test_display.py script, change the import line to match your model:
 
@@ -27,6 +35,21 @@ from waveshare_epd import epd7in5_V2 as epd
 # Or if you have a 2.9 inch display:
 from waveshare_epd import epd2in9 as epd
 ```
+
+### For Color Displays
+
+For the 7.3 inch ACeP 7-Color display, you'll need to update additional settings:
+
+```python
+# In your configuration:
+config["display"]["color_mode"] = "color"
+config["display"]["display_type"] = "7in3f"
+
+# And in your code:
+from waveshare_epd import epd7in3f as epd
+```
+
+The 7-color ACeP display has a much longer refresh time (approximately 35 seconds) compared to monochrome displays, so plan your application accordingly.
 
 ## Identifying Your Display
 

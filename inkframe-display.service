@@ -1,0 +1,17 @@
+[Unit]
+Description=InkFrame Photo Display
+After=network.target
+
+[Service]
+Type=simple
+User=spencer
+WorkingDirectory=/home/spencer/InkFrame
+Environment="PYTHONPATH=/home/spencer/InkFrame"
+ExecStart=/home/spencer/InkFrame/venv/bin/python3 /home/spencer/InkFrame/src/display/photo_manager.py
+Restart=on-failure
+RestartSec=30
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

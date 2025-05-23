@@ -49,9 +49,10 @@ class PhotoManager:
         """
         self.config = self._load_config(config_path)
         
-        # Initialize display with grayscale mode from config
-        grayscale_mode = self.config["display"].get("grayscale_mode", True)
-        self.display = EInkDisplay(grayscale_mode=grayscale_mode)
+        # Initialize display with display type and color mode from config
+        display_type = self.config["display"].get("display_type", "7in5_V2")
+        color_mode = self.config["display"].get("color_mode", "grayscale")
+        self.display = EInkDisplay(display_type=display_type, color_mode=color_mode)
         
         self.weather_client = WeatherClient(self.config)
         

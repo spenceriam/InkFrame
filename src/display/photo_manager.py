@@ -815,6 +815,10 @@ class PhotoManager:
         logger.info("Starting photo display cycle")
         
         try:
+            # Clear the display first to ensure a clean start
+            logger.info("Clearing display before starting cycle...")
+            self.display.clear()
+            
             # Do an initial display
             force_refresh = True  # Force refresh on first display
             self.display_current_mode(force_refresh)
@@ -860,6 +864,15 @@ class PhotoManager:
                 pass
         finally:
             # Clean up resources
+            logger.info("Cleaning up display resources...")
+            try:
+                # Clear the display before shutting down
+                self.display.clear()
+                logger.info("Display cleared")
+            except Exception as e:
+                logger.error(f"Error clearing display: {e}")
+            
+            # Put display to sleep
             self.display.sleep()
             self.display.close()
             logger.info("Photo cycle ended, display resources released")

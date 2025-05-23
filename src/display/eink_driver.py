@@ -268,7 +268,9 @@ class EInkDisplay:
             
         try:
             logger.info("Closing display")
-            self.epd.Dev_exit()
+            # The 7in3f driver doesn't have Dev_exit, just pass
+            if hasattr(self.epd, 'Dev_exit'):
+                self.epd.Dev_exit()
             return True
         except Exception as e:
             logger.error(f"Error closing display: {e}")

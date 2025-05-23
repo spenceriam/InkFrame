@@ -77,7 +77,7 @@ mkdir -p config
 mkdir -p logs
 
 echo -e "${GREEN}Setting permissions...${NC}"
-chown -R pi:pi .
+chown -R spencer:spencer .
 chmod +x src/web/app.py
 chmod +x src/display/photo_manager.py
 
@@ -89,7 +89,7 @@ Description=InkFrame Web Interface
 After=network.target
 
 [Service]
-User=pi
+User=spencer
 WorkingDirectory=${SCRIPT_DIR}
 ExecStart=${SCRIPT_DIR}/venv/bin/gunicorn --workers 1 --bind 0.0.0.0:5000 src.web.app:app
 Restart=always
@@ -107,7 +107,7 @@ Description=InkFrame Photo Display
 After=network.target
 
 [Service]
-User=pi
+User=spencer
 WorkingDirectory=${SCRIPT_DIR}
 ExecStart=${SCRIPT_DIR}/venv/bin/python3 ${SCRIPT_DIR}/src/display/photo_manager.py
 Restart=always

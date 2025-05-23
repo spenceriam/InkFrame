@@ -59,7 +59,7 @@ fi
 rm -rf waveshare_repo
 
 # Set permissions
-chown -R pi:pi waveshare_epd
+chown -R spencer:spencer waveshare_epd
 
 echo -e "${GREEN}Testing Python import...${NC}"
 # Test if we can import the modules

@@ -304,29 +304,8 @@ class PhotoManager:
         # Draw a top border
         draw.line([(0, 0), (width, 0)], fill=fg_color, width=1)
         
-        # Get current time with timezone support
-        timezone_name = self.config["system"].get("timezone", "UTC")
-        try:
-            tz = pytz.timezone(timezone_name)
-            now = datetime.now(tz)
-        except:
-            logger.warning(f"Invalid timezone: {timezone_name}, using system time")
-            now = datetime.now()
-            
-        # Format time based on locale settings
-        time_format = self.config["display"].get("time_format", "%I:%M %p")
-        date_format = self.config["display"].get("date_format", "%b %d, %Y")
-        
-        try:
-            time_str = now.strftime(time_format)
-            date_str = now.strftime(date_format)
-            datetime_str = f"{time_str} - {date_str}"
-        except:
-            # Fall back to default format if custom format fails
-            datetime_str = now.strftime("%I:%M %p - %b %d, %Y")
-        
-        # Draw the time on the left
-        draw.text((10, 9), datetime_str, font=self.font, fill=fg_color)
+        # Status bar now only shows weather, no time
+        # (E-ink displays with 35-second refresh aren't suitable for clocks)
         
         # Update weather if needed
         current_time = time.time()
@@ -352,16 +331,22 @@ class PhotoManager:
             # Get any weather alerts if available
             has_alert = weather_data.get("has_alert", False)
             
-            # Draw the weather on the right
+            # Draw the weather centered (since no time on left)
             weather_text = f"{temp}{unit_symbol} - {condition}"
             if has_alert:
                 weather_text = "⚠️ " + weather_text  # Add alert indicator
                 
-            text_width = self.font.getbbox(weather_text)[2]
-            draw.text((width - text_width - 10, 9), weather_text, font=self.font, fill=fg_color)
+            text_bbox = self.font.getbbox(weather_text)
+            text_width = text_bbox[2] - text_bbox[0]
+            text_x = (width - text_width) // 2
+            draw.text((text_x, 9), weather_text, font=self.font, fill=fg_color)
         else:
-            # Draw placeholder if no weather
-            draw.text((width - 150, 10), "Weather unavailable", font=self.font_small, fill=fg_color)
+            # Draw placeholder if no weather (centered)
+            no_weather_text = "Weather unavailable"
+            text_bbox = self.font_small.getbbox(no_weather_text)
+            text_width = text_bbox[2] - text_bbox[0]
+            text_x = (width - text_width) // 2
+            draw.text((text_x, 11), no_weather_text, font=self.font_small, fill=fg_color)
         
         return status_bar
     

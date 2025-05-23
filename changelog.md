@@ -21,6 +21,8 @@ All notable changes to the InkFrame project will be documented in this file.
 - Fixed weather client returning wrong data format causing N/A display
 - Fixed display clear to reinitialize if needed
 - Fixed systemd service file to run correct entry point (run.py instead of photo_manager.py)
+- Fixed inverted colors by adding ImageOps.invert for 7in3f driver
+- Fixed timezone list to use proper America/Chicago format
 
 ### Changed
 - Images for color displays now properly quantize to the 7 available ACeP colors
@@ -29,6 +31,7 @@ All notable changes to the InkFrame project will be documented in this file.
 
 ### Removed
 - Clock mode removed (not suitable for e-ink displays with 35-second refresh)
+- Time display removed from status bar (only weather shown now)
 
 ## [0.1.1] - 2025-05-19
 

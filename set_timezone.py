@@ -43,12 +43,12 @@ def get_system_timezone():
 def list_common_timezones():
     """List common US timezones"""
     common = [
-        ('US/Eastern', 'Eastern Time (New York, Miami)'),
-        ('US/Central', 'Central Time (Chicago, Dallas)'),
-        ('US/Mountain', 'Mountain Time (Denver, Phoenix)'),
-        ('US/Pacific', 'Pacific Time (Los Angeles, Seattle)'),
-        ('US/Alaska', 'Alaska Time'),
-        ('US/Hawaii', 'Hawaii Time'),
+        ('America/New_York', 'Eastern Time (New York, Miami)'),
+        ('America/Chicago', 'Central Time (Chicago, Illinois, Dallas)'),
+        ('America/Denver', 'Mountain Time (Denver, Phoenix)'),
+        ('America/Los_Angeles', 'Pacific Time (Los Angeles, Seattle)'),
+        ('America/Anchorage', 'Alaska Time'),
+        ('Pacific/Honolulu', 'Hawaii Time'),
         ('Europe/London', 'London'),
         ('Europe/Paris', 'Paris, Berlin'),
         ('Asia/Tokyo', 'Tokyo'),

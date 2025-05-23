@@ -202,6 +202,11 @@ class EInkDisplay:
             # Display the image with appropriate refresh mode based on display type and color mode
             if self.is_color_display:  # 7.3 inch ACeP 7-color display
                 logger.info("Displaying on 7-color ACeP display")
+                # The 7in3f driver seems to invert colors, so we need to invert them first
+                # This is a known issue with some Waveshare drivers
+                from PIL import ImageOps
+                image = ImageOps.invert(image)
+                logger.debug("Inverted image colors to compensate for driver inversion")
                 # ACeP displays always need a full refresh
                 self.epd.display(self.epd.getbuffer(image))
                 self.last_full_refresh = current_time

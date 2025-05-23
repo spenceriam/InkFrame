@@ -36,9 +36,11 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Initialize application
+# Get the absolute path to the project root
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 app = Flask(__name__, 
-           static_folder=os.path.abspath('../../static'),
-           template_folder=os.path.abspath('../../static/templates'))
+           static_folder=os.path.join(project_root, 'static'),
+           template_folder=os.path.join(project_root, 'static', 'templates'))
 
 # Initialize components
 config_manager = ConfigManager()

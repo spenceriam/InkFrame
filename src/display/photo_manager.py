@@ -286,9 +286,18 @@ class PhotoManager:
             PIL.Image: Status bar image
         """
         # Configure image mode based on display mode
-        image_mode = 'L' if self.display.grayscale_mode else '1'
-        bg_color = 255  # White background
-        fg_color = 0    # Black text/lines
+        if self.display.is_color_display:
+            image_mode = 'RGB'
+            bg_color = (255, 255, 255)  # White background
+            fg_color = (0, 0, 0)    # Black text/lines
+        elif self.display.grayscale_mode:
+            image_mode = 'L'
+            bg_color = 255  # White background
+            fg_color = 0    # Black text/lines
+        else:
+            image_mode = '1'
+            bg_color = 255  # White background
+            fg_color = 0    # Black text/lines
         
         # Create a blank status bar
         status_bar = Image.new(image_mode, (width, height), bg_color)
@@ -368,7 +377,17 @@ class PhotoManager:
         display_height = self.display.height
         
         # Configure image mode based on display settings
-        image_mode = 'L' if self.display.grayscale_mode else '1'
+        if self.display.is_color_display:
+
+            image_mode = 'RGB'
+
+        elif self.display.grayscale_mode:
+
+            image_mode = 'L'
+
+        else:
+
+            image_mode = '1'
         bg_color = 255  # White background
         fg_color = 0    # Black text/lines
         
@@ -475,7 +494,17 @@ class PhotoManager:
         display_height = self.display.height
         
         # Configure image mode based on display settings
-        image_mode = 'L' if self.display.grayscale_mode else '1'
+        if self.display.is_color_display:
+
+            image_mode = 'RGB'
+
+        elif self.display.grayscale_mode:
+
+            image_mode = 'L'
+
+        else:
+
+            image_mode = '1'
         bg_color = 255  # White background
         fg_color = 0    # Black text/lines
         
@@ -514,7 +543,7 @@ class PhotoManager:
         
         # Current settings
         interval = self.config["display"].get("rotation_interval_minutes", 60)
-        display_mode = "Grayscale" if self.display.grayscale_mode else "Black & White"
+        display_mode = "Color" if self.display.is_color_display else ("Grayscale" if self.display.grayscale_mode else "Black & White")
         dithering = "Enabled" if self.config["display"].get("enable_dithering", True) else "Disabled"
         
         # Format information lines
@@ -593,7 +622,17 @@ class PhotoManager:
             photo_height = display_height - status_bar_height
             
             # Configure image mode based on display settings
-            image_mode = 'L' if self.display.grayscale_mode else '1'
+            if self.display.is_color_display:
+
+                image_mode = 'RGB'
+
+            elif self.display.grayscale_mode:
+
+                image_mode = 'L'
+
+            else:
+
+                image_mode = '1'
             bg_color = 255  # White background
             
             # Resize photo while maintaining aspect ratio
@@ -656,7 +695,17 @@ class PhotoManager:
             display_height = self.display.height
             
             # Configure image mode based on display settings
-            image_mode = 'L' if self.display.grayscale_mode else '1'
+            if self.display.is_color_display:
+
+                image_mode = 'RGB'
+
+            elif self.display.grayscale_mode:
+
+                image_mode = 'L'
+
+            else:
+
+                image_mode = '1'
             bg_color = 255  # White background
             fg_color = 0    # Black text
             

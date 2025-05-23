@@ -274,7 +274,7 @@ def update_config():
 def get_weather():
     """Get the current weather"""
     try:
-        weather = weather_client.get_current_weather()
+        weather = weather_client.get_weather()
         
         if weather:
             return jsonify({'weather': weather})
@@ -288,7 +288,7 @@ def get_weather():
 def refresh_weather():
     """Force refresh the weather data"""
     try:
-        weather = weather_client.get_current_weather(force_refresh=True)
+        weather = weather_client.get_weather()
         
         if weather:
             return jsonify({'weather': weather, 'message': 'Weather data refreshed'})

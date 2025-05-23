@@ -331,7 +331,7 @@ class PhotoManager:
             self.last_weather_update = current_time
         
         # Get weather data if available
-        weather_data = self.weather_client.get_current_weather()
+        weather_data = self.weather_client.get_weather()
         
         if weather_data:
             # Format temperature based on units (default to Celsius)
@@ -430,7 +430,7 @@ class PhotoManager:
         draw.text((date_x, date_y), date_str, font=self.font_bold, fill=fg_color)
         
         # Get weather data if available and draw at bottom
-        weather_data = self.weather_client.get_current_weather()
+        weather_data = self.weather_client.get_weather()
         
         if weather_data:
             # Format temperature based on units (default to Celsius)
@@ -536,7 +536,7 @@ class PhotoManager:
             y_position += 40
         
         # Add weather data if available
-        weather_data = self.weather_client.get_current_weather()
+        weather_data = self.weather_client.get_weather()
         if weather_data:
             draw.line([(50, y_position), (display_width - 50, y_position)], fill=fg_color, width=1)
             y_position += 30

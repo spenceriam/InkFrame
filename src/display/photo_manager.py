@@ -623,49 +623,51 @@ class PhotoManager:
             
             # Configure image mode based on display settings
             if self.display.is_color_display:
-
                 image_mode = 'RGB'
-
+                bg_color = (255, 255, 255)  # White background for color
             elif self.display.grayscale_mode:
-
                 image_mode = 'L'
-
+                bg_color = 255  # White background for grayscale
             else:
-
                 image_mode = '1'
-            bg_color = 255  # White background
+                bg_color = 255  # White background for B&W
             
-            # Resize photo while maintaining aspect ratio
+            # Convert photo to RGB if it's a color display
+            if self.display.is_color_display and photo.mode != 'RGB':
+                photo = photo.convert('RGB')
+            
+            # Center crop to fill the display (no side bars)
             photo_ratio = photo.width / photo.height
             display_ratio = display_width / photo_height
             
             if photo_ratio > display_ratio:
-                # Photo is wider than display ratio
-                new_width = display_width
-                new_height = int(display_width / photo_ratio)
-            else:
-                # Photo is taller than display ratio
+                # Photo is wider than display ratio - crop width
                 new_height = photo_height
                 new_width = int(photo_height * photo_ratio)
+                photo = photo.resize((new_width, new_height), Image.Resampling.LANCZOS)
+                # Crop to center
+                left = (new_width - display_width) // 2
+                photo = photo.crop((left, 0, left + display_width, new_height))
+            else:
+                # Photo is taller than display ratio - crop height
+                new_width = display_width
+                new_height = int(display_width / photo_ratio)
+                photo = photo.resize((new_width, new_height), Image.Resampling.LANCZOS)
+                # Crop to center
+                top = (new_height - photo_height) // 2
+                photo = photo.crop((0, top, new_width, top + photo_height))
             
-            # Use high-quality resizing
-            photo = photo.resize((new_width, new_height), Image.Resampling.LANCZOS)
-            
-            # Create a white canvas for the display
+            # Create canvas for the display
             canvas = Image.new(image_mode, (display_width, display_height), bg_color)
             
-            # Calculate position to center the photo
-            x_offset = (display_width - new_width) // 2
-            y_offset = (photo_height - new_height) // 2
-            
-            # Convert photo to appropriate mode
+            # Convert photo to appropriate mode if needed
             if image_mode == 'L' and photo.mode != 'L':
                 photo = photo.convert('L')
             elif image_mode == '1' and photo.mode != '1':
                 photo = photo.convert('1')
             
-            # Paste the photo onto the canvas
-            canvas.paste(photo, (x_offset, y_offset))
+            # Paste the photo at the top (it's already sized to fit)
+            canvas.paste(photo, (0, 0))
             
             # Create and add the status bar at the bottom
             status_bar = self.create_status_bar(display_width, status_bar_height)

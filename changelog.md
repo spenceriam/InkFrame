@@ -2,6 +2,21 @@
 
 All notable changes to the InkFrame project will be documented in this file.
 
+## [0.1.2] - 2025-05-23
+
+### Added
+- Support for 7.3 inch color e-ink display (7in3f ACeP 7-color)
+- Center cropping feature for photos to fill the entire screen without side bars
+
+### Fixed
+- Fixed color inversion issue on 7-color displays by removing palette quantization
+- Fixed incorrect background color handling for RGB mode displays
+- Fixed side bar color issues when displaying photos on color displays
+
+### Changed
+- Images for color displays now remain in full RGB format for proper color mapping
+- Photo display now uses center cropping instead of letterboxing to avoid side bars
+
 ## [0.1.1] - 2025-05-19
 
 ### Added

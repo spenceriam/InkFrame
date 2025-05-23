@@ -305,29 +305,13 @@ class ImageProcessor:
         Returns:
             PIL.Image: Processed image for 7-color ACeP display
         """
-        # Create a palette image with the 7 colors available on the ACeP display
-        palette_image = Image.new('P', (1, 1))
-        palette_data = []
-        for color in self.acep_colors:
-            palette_data.extend(color)
-        # Fill the rest of the palette with zeros
-        while len(palette_data) < 768:  # 256 * 3 colors
-            palette_data.extend([0, 0, 0])
-            
-        # Set the palette
-        palette_image.putpalette(palette_data)
+        # For the 7-color display, we should NOT quantize to the palette
+        # The Waveshare driver expects a full RGB image and will handle the color mapping
+        # Quantizing here causes color inversion issues
         
-        # Apply dithering if enabled
-        if self.enable_dithering:
-            dither_method = self.dithering_methods.get(self.dithering_method)
-            # Convert to palette mode with dithering
-            image = image.quantize(colors=len(self.acep_colors), palette=palette_image, dither=dither_method)
-        else:
-            # Convert to palette mode without dithering
-            image = image.quantize(colors=len(self.acep_colors), palette=palette_image)
-        
-        # Convert to RGB for saving (needed for some formats)
-        image = image.convert('RGB')
+        # Just ensure it's RGB and return it
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
         
         return image
     

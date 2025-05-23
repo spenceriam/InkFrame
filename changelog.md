@@ -7,6 +7,9 @@ All notable changes to the InkFrame project will be documented in this file.
 ### Added
 - Support for 7.3 inch color e-ink display (7in3f ACeP 7-color)
 - Center cropping feature for photos to fill the entire screen without side bars
+- Timezone configuration script (set_timezone.py) with automatic detection
+- Placeholder for partial refresh clock updates (implementation pending)
+- Comments about e-ink clock update limitations
 
 ### Fixed
 - Fixed color inversion issue on 7-color displays by removing palette quantization

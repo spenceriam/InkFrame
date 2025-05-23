@@ -132,3 +132,16 @@ Optimize code to work within these constraints:
 - Process images at upload time rather than display time
 - Minimize memory-intensive operations
 - Use efficient file formats (BMP works faster with e-ink)
+
+### Development Workflow
+
+When making changes to the codebase:
+1. Implement the requested features or fixes
+2. Update `changelog.md` with a summary of changes
+3. Commit changes with a descriptive message
+4. Push to GitHub so changes can be pulled on the InkFrame device
+
+**IMPORTANT**: Always remember to:
+- Update `changelog.md` before committing
+- Use `git commit` with the Claude Code signature
+- Push changes to the repository

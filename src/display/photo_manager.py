@@ -752,6 +752,33 @@ class PhotoManager:
             logger.error(f"Error displaying error message: {e}")
             return False
     
+    def update_status_bar_only(self):
+        """Update only the status bar area using partial refresh
+        
+        This is useful for updating the time without refreshing the entire display.
+        Note: Only works on displays that support partial refresh.
+        
+        Returns:
+            bool: True if successful, False otherwise
+        """
+        try:
+            if self.display.is_color_display:
+                # Color displays typically don't support partial refresh
+                return False
+                
+            # Create just the status bar
+            status_bar_height = self.config["display"]["status_bar_height"]
+            status_bar = self.create_status_bar(self.display.width, status_bar_height)
+            
+            # For now, we'll skip partial refresh implementation as it's complex
+            # and requires specific display support
+            logger.debug("Partial refresh for status bar not yet implemented")
+            return False
+            
+        except Exception as e:
+            logger.error(f"Error updating status bar: {e}")
+            return False
+    
     def display_current_mode(self, force_refresh=False):
         """Display content based on current display mode
         
@@ -810,6 +837,12 @@ class PhotoManager:
                 if now - self.last_photo_change >= interval_seconds:
                     logger.info(f"Rotation interval reached, updating display")
                     self.display_current_mode(force_refresh)
+                elif self.current_mode == DisplayMode.CLOCK:
+                    # For clock mode, we could update more frequently if partial refresh worked
+                    # However, most e-ink displays (especially color ones) don't support
+                    # partial refresh well enough for a real-time clock
+                    # The clock will update when the rotation interval is reached
+                    pass
                 
                 # Sleep for a while (check more frequently than the full interval)
                 # This allows us to respond to signals and changes more promptly

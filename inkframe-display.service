@@ -7,7 +7,7 @@ Type=simple
 User=spencer
 WorkingDirectory=/home/spencer/InkFrame
 Environment="PYTHONPATH=/home/spencer/InkFrame"
-ExecStart=/home/spencer/InkFrame/venv/bin/python3 /home/spencer/InkFrame/src/display/photo_manager.py
+ExecStart=/home/spencer/InkFrame/venv/bin/python3 /home/spencer/InkFrame/run.py --display-only
 Restart=on-failure
 RestartSec=30
 StandardOutput=journal

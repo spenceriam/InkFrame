@@ -20,6 +20,7 @@ All notable changes to the InkFrame project will be documented in this file.
 - Fixed display not clearing on service startup/shutdown
 - Fixed weather client returning wrong data format causing N/A display
 - Fixed display clear to reinitialize if needed
+- Fixed systemd service file to run correct entry point (run.py instead of photo_manager.py)
 
 ### Changed
 - Images for color displays now properly quantize to the 7 available ACeP colors

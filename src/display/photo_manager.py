@@ -182,11 +182,22 @@ class PhotoManager:
             logger.error(f"Photo directory not found: {photo_dir}")
             return None
         
-        # Get list of photo files
+        # Get list of photo files - PREFER BMP files for color display
         photos = []
+        bmp_files = set()
+        
+        # First, collect all BMP files
         for filename in os.listdir(photo_dir):
-            if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp')):
+            if filename.lower().endswith('.bmp'):
                 photos.append(os.path.join(photo_dir, filename))
+                bmp_files.add(filename.rsplit('.', 1)[0].lower())
+        
+        # Then add other formats ONLY if no BMP version exists
+        for filename in os.listdir(photo_dir):
+            if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+                base_name = filename.rsplit('.', 1)[0].lower()
+                if base_name not in bmp_files:
+                    photos.append(os.path.join(photo_dir, filename))
         
         if not photos:
             logger.warning("No photos found in photo directory")

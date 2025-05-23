@@ -204,9 +204,10 @@ class EInkDisplay:
                 logger.info("Displaying on 7-color ACeP display")
                 logger.debug(f"Image before display: mode={image.mode}, size={image.size}")
                 
+                # TEMPORARILY DISABLED: Let's see if inversion is the problem
                 # The 7in3f driver seems to invert colors, so we need to invert them first
                 # But we need to ensure the image stays in RGB mode
-                if image.mode == 'RGB':
+                if False and image.mode == 'RGB':
                     # For RGB images, invert each channel separately to preserve color
                     r, g, b = image.split()
                     from PIL import ImageOps
@@ -216,7 +217,7 @@ class EInkDisplay:
                     image = Image.merge('RGB', (r, g, b))
                     logger.debug("Inverted RGB image colors to compensate for driver inversion")
                 else:
-                    logger.warning(f"Expected RGB image but got {image.mode}")
+                    logger.debug(f"NOT inverting image, mode={image.mode}")
                 
                 # ACeP displays always need a full refresh
                 self.epd.display(self.epd.getbuffer(image))

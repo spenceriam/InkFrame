@@ -24,6 +24,9 @@ All notable changes to the InkFrame project will be documented in this file.
 - Photo display now uses center cropping instead of letterboxing to avoid side bars
 - Added proper color mapping for ACeP display (Black, White, Red, Green, Blue, Yellow, Orange)
 
+### Removed
+- Clock mode removed (not suitable for e-ink displays with 35-second refresh)
+
 ## [0.1.1] - 2025-05-19
 
 ### Added

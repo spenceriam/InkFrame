@@ -30,9 +30,7 @@ logger = logging.getLogger(__name__)
 class DisplayMode(Enum):
     """Enum for different display modes"""
     PHOTO = 1      # Show photos with status bar
-    CLOCK = 2      # Show large clock with date and weather
     INFO = 3       # Show system information and status
-    WEATHER = 4    # Show detailed weather information
 
 class PhotoManager:
     """Manages photo selection and display
@@ -138,11 +136,11 @@ class PhotoManager:
     def _handle_mode_change_signal(self, signum, frame):
         """Handle signal to change display mode"""
         logger.info("Received signal to change display mode")
-        # Cycle through display modes
-        mode_list = list(DisplayMode)
-        current_index = mode_list.index(self.current_mode)
-        next_index = (current_index + 1) % len(mode_list)
-        self.current_mode = mode_list[next_index]
+        # Cycle through display modes (PHOTO and INFO only now)
+        if self.current_mode == DisplayMode.PHOTO:
+            self.current_mode = DisplayMode.INFO
+        else:
+            self.current_mode = DisplayMode.PHOTO
         logger.info(f"Switched to display mode: {self.current_mode.name}")
     
     def load_viewed_photos(self):
@@ -791,19 +789,9 @@ class PhotoManager:
         if self.current_mode == DisplayMode.PHOTO:
             return self.display_photo(force_refresh=force_refresh)
             
-        elif self.current_mode == DisplayMode.CLOCK:
-            clock_display = self.create_clock_display()
-            return self.display.display_image_buffer(clock_display, force_refresh)
-            
         elif self.current_mode == DisplayMode.INFO:
             info_display = self.create_info_display()
             return self.display.display_image_buffer(info_display, force_refresh)
-            
-        elif self.current_mode == DisplayMode.WEATHER:
-            # TODO: Implement detailed weather display
-            # For now, fall back to photo mode
-            self.current_mode = DisplayMode.PHOTO
-            return self.display_photo(force_refresh=force_refresh)
             
         else:
             logger.error(f"Unknown display mode: {self.current_mode}")
@@ -841,12 +829,6 @@ class PhotoManager:
                 if now - self.last_photo_change >= interval_seconds:
                     logger.info(f"Rotation interval reached, updating display")
                     self.display_current_mode(force_refresh)
-                elif self.current_mode == DisplayMode.CLOCK:
-                    # For clock mode, we could update more frequently if partial refresh worked
-                    # However, most e-ink displays (especially color ones) don't support
-                    # partial refresh well enough for a real-time clock
-                    # The clock will update when the rotation interval is reached
-                    pass
                 
                 # Sleep for a while (check more frequently than the full interval)
                 # This allows us to respond to signals and changes more promptly

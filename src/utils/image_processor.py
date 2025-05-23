@@ -59,6 +59,7 @@ class ImageProcessor:
         }
         
         # Define the 7-color palette for ACeP display
+        # These are the EXACT colors the 7.3" ACeP display can show
         self.acep_colors = [
             (0, 0, 0),      # Black
             (255, 255, 255), # White
@@ -305,15 +306,70 @@ class ImageProcessor:
         Returns:
             PIL.Image: Processed image for 7-color ACeP display
         """
-        # For the 7-color display, we should NOT quantize to the palette
-        # The Waveshare driver expects a full RGB image and will handle the color mapping
-        # Quantizing here causes color inversion issues
-        
-        # Just ensure it's RGB and return it
+        # Ensure image is RGB
         if image.mode != 'RGB':
             image = image.convert('RGB')
         
+        # The 7.3" ACeP display can ONLY show these 7 colors
+        # We need to map each pixel to the nearest available color
+        
+        if self.enable_dithering:
+            # Method 1: Use PIL's quantize with a custom palette for better results
+            # Create a palette image with the 7 ACeP colors
+            palette_img = Image.new('P', (1, 1))
+            palette_data = []
+            for color in self.acep_colors:
+                palette_data.extend(color)
+            # Pad the palette to 256 colors (required by PIL)
+            while len(palette_data) < 768:  # 256 * 3
+                palette_data.extend([0, 0, 0])
+            palette_img.putpalette(palette_data)
+            
+            # Quantize with dithering
+            dither_method = self.dithering_methods.get(self.dithering_method, Image.Dither.FLOYDSTEINBERG)
+            # Convert to palette mode with only 7 colors
+            image = image.quantize(palette=palette_img, dither=dither_method)
+            # Convert back to RGB
+            image = image.convert('RGB')
+        else:
+            # Method 2: Simple nearest color mapping without dithering
+            # This is faster but produces less smooth results
+            width, height = image.size
+            pixels = image.load()
+            
+            for y in range(height):
+                for x in range(width):
+                    r, g, b = pixels[x, y]
+                    # Find the nearest ACeP color
+                    nearest_color = self._find_nearest_acep_color(r, g, b)
+                    pixels[x, y] = nearest_color
+        
         return image
+    
+    def _find_nearest_acep_color(self, r, g, b):
+        """Find the nearest ACeP color to the given RGB value
+        
+        Args:
+            r, g, b: RGB values (0-255)
+            
+        Returns:
+            tuple: The nearest ACeP color as (r, g, b)
+        """
+        min_distance = float('inf')
+        nearest_color = self.acep_colors[0]
+        
+        for color in self.acep_colors:
+            # Calculate Euclidean distance in RGB space
+            dr = r - color[0]
+            dg = g - color[1]
+            db = b - color[2]
+            distance = dr*dr + dg*dg + db*db
+            
+            if distance < min_distance:
+                min_distance = distance
+                nearest_color = color
+        
+        return nearest_color
     
     def _process_black_white(self, image):
         """Process image for 1-bit black and white e-ink display

@@ -10,15 +10,18 @@ All notable changes to the InkFrame project will be documented in this file.
 - Timezone configuration script (set_timezone.py) with automatic detection
 - Placeholder for partial refresh clock updates (implementation pending)
 - Comments about e-ink clock update limitations
+- Test script for ACeP photo processing (test_acep_photos.py)
 
 ### Fixed
 - Fixed color inversion issue on 7-color displays by removing palette quantization
 - Fixed incorrect background color handling for RGB mode displays
 - Fixed side bar color issues when displaying photos on color displays
+- Fixed color image processing to properly quantize to 7 ACeP colors with dithering
 
 ### Changed
-- Images for color displays now remain in full RGB format for proper color mapping
+- Images for color displays now properly quantize to the 7 available ACeP colors
 - Photo display now uses center cropping instead of letterboxing to avoid side bars
+- Added proper color mapping for ACeP display (Black, White, Red, Green, Blue, Yellow, Orange)
 
 ## [0.1.1] - 2025-05-19
 

@@ -115,11 +115,17 @@ class EInkDisplay:
             return True
             
         if not self.initialized:
-            return False
+            logger.warning("Display not initialized, attempting to initialize before clear")
+            if not self.init_display():
+                return False
             
         try:
-            logger.info("Clearing display")
+            logger.info("Clearing display (this may take ~35 seconds)...")
+            # Some displays need to be woken up before clearing
+            if hasattr(self.epd, 'init'):
+                self.epd.init()
             self.epd.Clear()
+            logger.info("Display cleared")
             return True
         except Exception as e:
             logger.error(f"Error clearing display: {e}")

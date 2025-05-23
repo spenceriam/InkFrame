@@ -55,17 +55,31 @@ class WeatherClient:
         """Get current weather, using cache if valid"""
         if self._is_cache_valid():
             logger.info("Using cached weather data")
-            return self.cache["data"]
-        
-        logger.info("Fetching fresh weather data")
-        weather_data = self._fetch_weather()
-        
-        if weather_data:
-            self.cache["last_updated"] = datetime.now().isoformat()
-            self.cache["data"] = weather_data
-            self._save_cache()
+            weather_data = self.cache["data"]
+        else:
+            logger.info("Fetching fresh weather data")
+            weather_data = self._fetch_weather()
             
-        return weather_data
+            if weather_data:
+                self.cache["last_updated"] = datetime.now().isoformat()
+                self.cache["data"] = weather_data
+                self._save_cache()
+        
+        # Return simplified format for backward compatibility
+        if weather_data and "current" in weather_data:
+            current = weather_data["current"]
+            return {
+                "temp": current.get("temp", "N/A"),
+                "condition": current["weather"][0]["main"] if current.get("weather") else "Unknown",
+                "description": current["weather"][0]["description"] if current.get("weather") else "Unknown",
+                "humidity": current.get("humidity", "N/A"),
+                "wind_speed": current.get("wind_speed", "N/A"),
+                "feels_like": current.get("feels_like", "N/A"),
+                "has_alert": False,  # Free tier doesn't have alerts
+                "raw_data": weather_data  # Include full data if needed
+            }
+        
+        return None
     
     def _fetch_weather(self):
         """Fetch current weather from OpenWeatherMap free tier"""

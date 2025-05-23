@@ -1,5 +1,7 @@
 {
   "display": {
+    "type": "7in3f",
+    "color_mode": "color",
     "rotation_interval_minutes": 60,
     "status_bar_height": 40,
     "enable_dithering": true

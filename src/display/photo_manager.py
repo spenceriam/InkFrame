@@ -50,7 +50,7 @@ class PhotoManager:
         self.config = self._load_config(config_path)
         
         # Initialize display with display type and color mode from config
-        display_type = self.config["display"].get("display_type", "7in5_V2")
+        display_type = self.config["display"].get("type", "7in5_V2")
         color_mode = self.config["display"].get("color_mode", "grayscale")
         self.display = EInkDisplay(display_type=display_type, color_mode=color_mode)
         

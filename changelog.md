@@ -28,6 +28,7 @@ All notable changes to the InkFrame project will be documented in this file.
 - Images for color displays now properly quantize to the 7 available ACeP colors
 - Photo display now uses center cropping instead of letterboxing to avoid side bars
 - Added proper color mapping for ACeP display (Black, White, Red, Green, Blue, Yellow, Orange)
+- Web upload now automatically processes images to color when color mode is configured
 
 ### Removed
 - Clock mode removed (not suitable for e-ink displays with 35-second refresh)

@@ -158,9 +158,19 @@ def upload_photo():
             processed_path = image_processor.process_new_image(temp_path)
             
             if processed_path:
+                # Check if it's actually a color image
+                from PIL import Image
+                img = Image.open(processed_path)
+                img_info = f"Created {img.mode} image {img.size}"
+                
+                # If it's a color display and we got a grayscale image, warn
+                if config.get('display', {}).get('color_mode') == 'color' and img.mode == 'L':
+                    logger.warning(f"Color mode configured but created grayscale image: {processed_path}")
+                    img_info += " (WARNING: Grayscale instead of color!)"
+                
                 return jsonify({
                     'success': True,
-                    'message': 'File uploaded and processed successfully',
+                    'message': f'File uploaded and processed successfully. {img_info}',
                     'filename': os.path.basename(processed_path)
                 })
             else:

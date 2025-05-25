@@ -428,11 +428,19 @@ class ImageProcessor:
     def process_new_image(self, input_path):
         """Process a newly uploaded image and generate its thumbnail"""
         # Preprocess for e-ink display
-        output_path = self.preprocess_image(input_path)
+        # Force color mode if the display is configured for color
+        mode = 'color' if self.config["display"].get("color_mode") == "color" else None
+        output_path = self.preprocess_image(input_path, mode=mode)
         
         # Generate thumbnail for web interface
         if output_path:
             self.generate_thumbnail(input_path)
+            
+        # Log what was created
+        if output_path and os.path.exists(output_path):
+            from PIL import Image
+            img = Image.open(output_path)
+            logger.info(f"Created {os.path.basename(output_path)}: mode={img.mode}, size={img.size}")
             
         return output_path
 

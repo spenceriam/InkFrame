@@ -20,7 +20,6 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 from src.utils.config_manager import ConfigManager
 from src.utils.image_processor import ImageProcessor
-from src.display.photo_manager import PhotoManager
 from src.weather.weather_client import WeatherClient
 
 # Configure logging

@@ -8,6 +8,7 @@ import sys
 import logging
 import json
 import glob
+import subprocess
 import threading
 import time
 from datetime import datetime
@@ -47,9 +48,7 @@ config = config_manager.config
 image_processor = ImageProcessor(config)
 weather_client = WeatherClient(config)
 
-# Global reference to the photo manager
-photo_manager = None
-photo_thread = None
+# Note: Photo manager runs in separate display service, not in web app
 
 # Setup upload directory
 UPLOAD_FOLDER = config['photos']['directory']
@@ -62,20 +61,6 @@ def allowed_file(filename):
     """Check if the file extension is allowed"""
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-def start_photo_thread():
-    """Start the photo display thread if it's not running"""
-    global photo_manager, photo_thread
-    
-    if photo_thread is None or not photo_thread.is_alive():
-        logger.info("Starting photo display thread")
-        photo_manager = PhotoManager(config_path="config/config.json")
-        photo_thread = threading.Thread(target=photo_manager.run_photo_cycle, daemon=True)
-        photo_thread.start()
-        return True
-    else:
-        logger.info("Photo display thread already running")
-        return False
 
 #
 # Routes
@@ -216,21 +201,24 @@ def delete_photo(photo_id):
 
 @app.route('/api/refresh', methods=['POST'])
 def refresh_display():
-    """Manually refresh the display with a new photo"""
+    """Manually refresh the display by restarting the display service"""
     try:
-        global photo_manager
+        # Restart the display service
+        # This will cause it to immediately select and display a new photo
+        result = subprocess.run(
+            ['sudo', 'systemctl', 'restart', 'inkframe-display.service'],
+            capture_output=True,
+            text=True
+        )
         
-        # If photo manager isn't running, start it
-        if not photo_manager:
-            photo_manager = PhotoManager(config_path="config/config.json")
-        
-        # Display a new random photo
-        success = photo_manager.display_photo()
-        
-        if success:
-            return jsonify({'success': True, 'message': 'Display refreshed with a new photo'})
+        if result.returncode == 0:
+            return jsonify({
+                'success': True, 
+                'message': 'Display service restarted. New photo will appear in ~35 seconds.'
+            })
         else:
-            return jsonify({'error': 'Failed to refresh display'}), 500
+            logger.error(f"Failed to restart display service: {result.stderr}")
+            return jsonify({'error': 'Failed to restart display service'}), 500
     except Exception as e:
         logger.error(f"Error refreshing display: {e}")
         return jsonify({'error': 'Failed to refresh display'}), 500
@@ -335,8 +323,14 @@ def get_system_status():
         except:
             pass
         
-        # Check if display thread is running
-        display_running = photo_thread is not None and photo_thread.is_alive()
+        # Check if display service is running
+        display_running = False
+        try:
+            result = subprocess.run(['systemctl', 'is-active', 'inkframe-display.service'], 
+                                  capture_output=True, text=True)
+            display_running = result.stdout.strip() == 'active'
+        except:
+            pass
         
         # Format disk space
         def format_size(size_bytes):
@@ -372,12 +366,13 @@ def get_system_status():
 def start_display():
     """Start the photo display service"""
     try:
-        success = start_photo_thread()
+        result = subprocess.run(['sudo', 'systemctl', 'start', 'inkframe-display.service'], 
+                              capture_output=True, text=True)
         
-        if success:
+        if result.returncode == 0:
             return jsonify({'success': True, 'message': 'Display service started'})
         else:
-            return jsonify({'success': True, 'message': 'Display service already running'})
+            return jsonify({'error': f'Failed to start service: {result.stderr}'}), 500
     except Exception as e:
         logger.error(f"Error starting display service: {e}")
         return jsonify({'error': 'Failed to start display service'}), 500
@@ -403,8 +398,7 @@ def get_logs():
 
 # Start the application
 if __name__ == '__main__':
-    # Start the photo display thread
-    start_photo_thread()
+    # Note: Display runs as a separate service (inkframe-display.service)
     
     # Start the Flask application
     port = config['system'].get('web_port', 5000)

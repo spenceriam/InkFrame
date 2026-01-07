@@ -295,6 +295,66 @@ tests/
 4. Update this AGENTS.md file
 5. Verify imports and references are updated
 
+### Planning and Documentation Requirements
+
+**CRITICAL**: All changes, fixes, and refactors MUST be planned and documented BEFORE implementation.
+
+#### Documentation Workflow
+
+1. **Before Any Change**: Create a planning document in `docs/`
+2. **Document Format**: Include date, timestamp, and issue reference (if applicable)
+3. **Check First**: Always verify if documentation already exists for the planned work
+4. **After Completion**: Move completed documentation to `docs/complete/`
+5. **Changelog**: Always update `docs/changelog.md` and tie to version number if applicable
+
+#### Documentation Structure
+
+```
+docs/
+├── complete/              # Completed implementation plans
+│   └── <completed-docs>   # Moved here after implementation
+├── changelog.md           # Version history (always update)
+├── <active-plans>.md      # In-progress planning documents
+└── <reference-docs>.md    # Permanent reference documentation
+```
+
+#### Planning Document Template
+
+Each planning document should include:
+- **Date/Timestamp**: When the plan was created
+- **Related Issue**: GitHub issue number (if applicable) or "N/A"
+- **Status**: Planning | In Progress | Complete
+- **Target Version**: Which version this targets (e.g., v1.2.0)
+- **Description**: What is being changed and why
+- **Tasks**: Broken down implementation steps
+- **Acceptance Criteria**: How to verify completion
+
+#### When to Create Documentation
+
+| Scenario | Action |
+|----------|--------|
+| New feature | Create `docs/<feature-name>.md` |
+| Bug fix | Create `docs/fix-<issue>.md` or update existing |
+| Refactor | Create `docs/refactor-<scope>.md` |
+| Configuration change | Update existing docs or create new |
+| Quick typo fix | Update changelog only (no separate doc needed) |
+
+#### Documentation Lifecycle
+
+1. **Create**: `docs/<plan-name>.md` with date and status
+2. **Implement**: Work through tasks, updating status
+3. **Complete**: Mark status as "Complete"
+4. **Archive**: Move to `docs/complete/` folder
+5. **Update Changelog**: Add entry to `docs/changelog.md`
+
+#### AI Agent Rules for Planning
+
+- **DO NOT** make code changes without a planning document
+- **ALWAYS** check `docs/` for existing plans before creating new ones
+- **ALWAYS** update `docs/changelog.md` after implementation
+- **ALWAYS** tie changelog entries to version numbers when applicable
+- **IF UNSURE** about a document's status, leave it in `docs/` (don't move to complete)
+
 ### Branch Naming Convention
 
 - `feature/` - New features

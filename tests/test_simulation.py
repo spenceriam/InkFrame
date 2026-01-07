@@ -116,6 +116,9 @@ def test_photo_manager():
     # Initialize the simulator
     assert display_simulator.init(), "Simulator initialization failed"
 
+    # Initialize photo manager with simulator instance
+    photo_manager = PhotoManager(display_instance=display_simulator)
+
     # Test random photo selection
     photo = photo_manager.get_random_photo()
     assert photo is not None, "Failed to get a random photo"

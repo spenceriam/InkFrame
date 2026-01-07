@@ -40,6 +40,8 @@ simulation/
 logs/
 *.log
 inkframe.log
+ENTIRE-CHAT.md
+issue-7-tasks.md
 
 # OS-specific
 .DS_Store

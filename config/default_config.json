@@ -25,6 +25,7 @@
     "timezone": "UTC",
     "web_port": 5000,
     "debug_mode": false,
-    "log_level": "INFO"
+    "log_level": "INFO",
+    "simulation_mode": false
   }
 }

@@ -1,6 +1,6 @@
 # AGENTS.md
 
-This file provides guidance to AI agents when working with code in this repository.
+This file provides guidance to AI agents and developers when working with code in this repository.
 
 ## Project Overview
 
@@ -10,14 +10,40 @@ InkFrame is a digital photo frame application designed for Raspberry Pi Zero W w
 
 Version: 1.1.0
 
-## Agent Guidelines
+## Version History
 
-### Code Organization
+### v1.1.0 (Current) - 2025-06-15
+- **BREAKING**: Migrated from OpenWeatherMap to weather.gov API
+  - No API key required
+  - US locations only (weather.gov limitation)
+  - Automatic IP-based geolocation
+  - Fallback to McHenry, IL coordinates
+- **NEW**: Added current date display in status bar (Month Day, Year format)
+- **NEW**: Added version number display in ghost text (bottom left)
+- **NEW**: Created `src/version.py` with semantic versioning
+- **FIXED**: Display service status reporting (added `_started` flag)
+- **NEW**: E-ink display simulator for testing without hardware
+- **NEW**: Comprehensive test organization
+- **REORGANIZED**: All utility scripts moved to `scripts/` directory
+  - `scripts/setup/` - Configuration and setup scripts
+  - `scripts/utils/` - Utility and helper scripts
+  - `scripts/photo/` - Photo processing scripts
+  - `scripts/debug/` - Debugging and troubleshooting scripts
+  - `scripts/fix/` - Bug fix and repair scripts
+
+### v1.0.0 - Initial Release
+- Basic photo frame functionality
+- OpenWeatherMap integration
+- Web interface for photo management
+- Display management system
+
+## Architecture
 
 The project follows a modular architecture:
 
 - **src/display/**: E-ink display management
   - `eink_driver.py`: Hardware abstraction for the display
+  - `eink_simulator.py`: Display simulator for testing without hardware
   - `photo_manager.py`: Photo selection and display cycle logic
 
 - **src/web/**: Web interface
@@ -30,11 +56,43 @@ The project follows a modular architecture:
   - `image_processor.py`: Image optimization for e-ink
   - `config_manager.py`: Configuration persistence
 
+- **scripts/**: Utility and helper scripts
+  - `setup/`: Configuration scripts (timezone, display type, weather config)
+  - `utils/`: Utility scripts (clear display, check directories, etc.)
+  - `photo/`: Photo processing scripts
+  - `debug/`: Debugging scripts
+  - `fix/`: Bug fix scripts
+
 - **tests/**: All test files organized by purpose
   - `test_simulation.py`: Simulation mode tests (works on any system)
   - `test_*.py`: Unit and integration tests
-  - `hardware/`: Hardware diagnostic and testing scripts
+  - `hardware/`: Hardware diagnostic scripts
   - `color/`: Color display specific tests
+
+## Agent Guidelines
+
+### Code Organization
+
+**IMPORTANT**: Keep root directory clean! All Python scripts and utilities should be in `scripts/` or `src/` directories.
+
+**Root Directory**:
+- `run.py` - Main entry point
+- `requirements.txt` - Python dependencies
+- `config/` - Configuration files
+- `static/` - Static assets
+- `templates/` - Web templates
+- `docs/` - Documentation
+- `AGENTS.md` - This file (replaces CLAUDE.md)
+
+**Scripts Directory Structure**:
+```
+scripts/
+├── setup/         # Configuration and setup
+├── utils/          # Utilities and helpers
+├── photo/          # Photo processing
+├── debug/          # Debugging tools
+└── fix/            # Repair scripts
+```
 
 ### Development Principles
 
@@ -78,6 +136,40 @@ The application uses the weather.gov API:
 - Returns temperature, conditions, and current date
 - Only covers US locations
 
+**Location Detection Strategy**:
+1. IP-based geolocation (primary) - Uses ip-api.com
+2. Configuration-based (secondary) - Reads city/state from config
+3. Hardcoded fallback (tertiary) - McHenry, IL coordinates
+
+**API Requirements**:
+- Rate limiting: 30-second minimum between requests
+- User-Agent header required for weather.gov
+- No authentication required
+
+### E-Ink Display Simulator
+
+For development without hardware, use the e-ink simulator:
+
+```python
+from src.display.eink_simulator import EInkSimulator
+
+# Create simulator instance
+display = EInkSimulator(display_type="7in5_V2", color_mode="grayscale")
+display.init()
+
+# Display images
+display.display_image_buffer(image)
+
+# Simulated output saved to simulation/ directory
+```
+
+**Simulator Features**:
+- Saves display output to `simulation/` directory
+- Supports all display types (7in5_V2, 7in3f, etc.)
+- Mimics e-ink refresh delays
+- Adds simulation info overlays
+- Creates PNG files for easy viewing
+
 ### Test Directory Organization
 
 All test files are organized in the `tests/` directory:
@@ -101,9 +193,11 @@ tests/
 │   ├── official_test.py              # Waveshare official test adaptation
 │   ├── check_model.py                # Display model compatibility checker
 │   ├── lgpio_test.py                 # lgpio library test
-│   └── lgpio_reset_test.py           # GPIO reset test
+│   ├── lgpio_reset_test.py           # GPIO reset test
+│   └── pin_check.py                  # GPIO interface availability checker
 └── color/                             # Color display specific tests
-    └── color_test.py                 # ACeP 7-color display test
+    ├── color_test.py                 # ACeP 7-color display test
+    └── color_display_test.py         # 7.3 inch ACeP 7-color e-ink display test
 ```
 
 **When writing tests:**
@@ -137,6 +231,19 @@ tests/
    - `tests/hardware/official_test.py`: Full compatibility check
 3. Consult `troubleshooting.md` for detailed steps
 
+#### Testing Without Hardware
+
+1. Use e-ink simulator for display testing:
+   ```python
+   from src.display.eink_simulator import EInkSimulator
+   display = EInkSimulator()
+   display.init()
+   display.display_image_buffer(test_image)
+   ```
+2. Check output in `simulation/` directory
+3. View generated PNG files to verify layout
+4. Test weather and status bar rendering
+
 #### Updating Weather Integration
 
 1. Modify `src/weather/weather_client.py`
@@ -145,14 +252,18 @@ tests/
 4. Verify API response format changes
 5. Run `tests/test_weather_api.py` to verify changes
 
-#### Moving or Organizing Test Files
+#### Moving or Organizing Scripts
 
-1. All test files must be in `tests/` directory
-2. Hardware diagnostic scripts go in `tests/hardware/`
-3. Color-specific tests go in `tests/color/`
-4. Update all documentation that references test paths
-5. Update this AGENTS.md file with new locations
-6. Verify imports and references are updated
+1. All utility scripts must be in `scripts/` directory
+2. Organization:
+   - `scripts/setup/` - Setup/configuration scripts
+   - `scripts/utils/` - Utility scripts
+   - `scripts/photo/` - Photo processing
+   - `scripts/debug/` - Debugging
+   - `scripts/fix/` - Repairs
+3. Update documentation that references script paths
+4. Update this AGENTS.md file
+5. Verify imports and references are updated
 
 ### Branch Naming Convention
 
@@ -160,6 +271,7 @@ tests/
 - `bugfix/` - Bug fixes
 - `hotfix/` - Critical fixes for production
 - `refactor/` - Code refactoring
+- `chore/` - Maintenance tasks (no code changes)
 
 ### Commit Message Format
 
@@ -170,19 +282,29 @@ Follow conventional commits:
 - `refactor:` - Code refactoring
 - `test:` - Test changes
 - `chore:` - Maintenance tasks
+- `chore:organize:` - File organization
 - `test:organize:` - Test file reorganization
+
+**Version Bump Workflow**:
+Before creating PR:
+1. Review changes and categorize (MAJOR.MINOR.PATCH)
+2. Ask user for version bump confirmation
+3. Update `src/version.py`
+4. Update AGENTS.md version history
+5. Commit with version bump
 
 ### Code Review Checklist
 
 Before submitting changes:
 - [ ] Code follows project structure
+- [ ] Root directory remains clean (scripts in `scripts/`, tests in `tests/`)
 - [ ] No resource leaks (file handles, threads, etc.)
 - [ ] Error handling is comprehensive
 - [ ] Logging is appropriate
 - [ ] Version has been updated if needed
 - [ ] AGENTS.md has been updated
 - [ ] Tests are in correct subdirectory
-- [ ] Documentation references updated for test paths
+- [ ] Documentation references updated for paths
 - [ ] Changes tested in simulation mode
 - [ ] Documentation updated
 
@@ -193,6 +315,7 @@ inkframe/
 ├── src/
 │   ├── display/
 │   │   ├── eink_driver.py
+│   │   ├── eink_simulator.py
 │   │   └── photo_manager.py
 │   ├── web/
 │   │   └── app.py
@@ -201,7 +324,9 @@ inkframe/
 │   ├── utils/
 │   │   ├── config_manager.py
 │   │   └── image_processor.py
-│   └── version.py
+│   ├── version.py
+│   ├── __init__.py
+│   └── main.py
 ├── tests/
 │   ├── README.md
 │   ├── test_simulation.py
@@ -220,25 +345,52 @@ inkframe/
 │   │   ├── official_test.py
 │   │   ├── check_model.py
 │   │   ├── lgpio_test.py
-│   │   └── lgpio_reset_test.py
+│   │   ├── lgpio_reset_test.py
+│   │   └── pin_check.py
 │   └── color/
-│       └── color_test.py
+│       ├── color_test.py
+│       └── color_display_test.py
+├── scripts/
+│   ├── setup/
+│   │   ├── set_timezone.py
+│   │   ├── set_display_type.py
+│   │   └── set_weather_config.py
+│   ├── utils/
+│   │   ├── clear_display.py
+│   │   ├── check_photos_dir.py
+│   │   ├── check_uploads_dir.py
+│   │   ├── check_processed_image.py
+│   │   └── clear_weather_cache.py
+│   ├── photo/
+│   │   ├── preprocess_photos.py
+│   │   ├── reprocess_one_photo.py
+│   │   └── process_uploads_to_color.py
+│   ├── debug/
+│   │   ├── debug_display.py
+│   │   ├── debug_photo_manager.py
+│   │   ├── debug_waveshare.py
+│   │   └── debug_color_issue.py
+│   └── fix/
+│       ├── fix_color_photos.py
+│       └── check_bmp_colors.py
 ├── templates/
 │   └── index.html
 ├── static/
-│   └── (CSS, JS, images)
-├── photos/
-│   └── (uploaded photos)
+│   ├── css/
+│   ├── js/
+│   └── images/
+│       └── photos/
+├── config/
+│   └── default_config.json
 ├── docs/
 │   └── (documentation)
-├── config/
-│   └── (configuration files)
-├── run.py
-├── requirements.txt
-├── AGENTS.md
-├── CLAUDE.md
-├── README.md
-└── changelog.md
+├── simulation/           # E-ink simulator output
+├── run.py              # Main entry point
+├── requirements.txt     # Dependencies
+├── AGENTS.md          # This file (replaces CLAUDE.md)
+├── README.md           # Project README
+├── changelog.md       # Version history
+└── troubleshooting.md   # Hardware troubleshooting guide
 ```
 
 ## API Reference
@@ -301,34 +453,375 @@ python tests/hardware/check_model.py
 # Run official Waveshare test
 python tests/hardware/official_test.py
 
-# Test lgpio library
-python tests/hardware/lgpio_test.py
+# Check available GPIO interfaces
+python tests/hardware/pin_check.py
 
 # Run full simulation test
 python tests/test_simulation.py
 
-# Run color display test
+# Test color display
 python tests/color/color_test.py
 ```
 
 See `tests/README.md` for comprehensive testing documentation.
 
-## Version History
+## Utility Scripts
 
-### v1.1.0 (Current)
-- Migrated from OpenWeatherMap to weather.gov API
-- Added IP-based geolocation for weather
-- Added current date display to status bar
-- Fixed display service status reporting
-- Added version display in ghost text
-- Created AGENTS.md for AI agent guidance
-- Reorganized test files into `tests/` directory structure
-- Separated hardware tests into `tests/hardware/`
-- Separated color tests into `tests/color/`
-- Updated all documentation for new test paths
+### Setup Scripts
 
-### v1.0.0
-- Initial release
-- Basic photo frame functionality
-- OpenWeatherMap integration
-- Web interface for photo management
+```bash
+# Set timezone
+python scripts/setup/set_timezone.py
+
+# Set display type
+python scripts/setup/set_display_type.py
+
+# Configure weather
+python scripts/setup/set_weather_config.py
+```
+
+### Utility Scripts
+
+```bash
+# Clear display
+python scripts/utils/clear_display.py
+
+# Clear weather cache
+python scripts/utils/clear_weather_cache.py
+
+# Check photos directory
+python scripts/utils/check_photos_dir.py
+
+# Check uploads directory
+python scripts/utils/check_uploads_dir.py
+
+# Check processed images
+python scripts/utils/check_processed_image.py
+```
+
+### Photo Processing
+
+```bash
+# Preprocess all photos
+python scripts/photo/preprocess_photos.py
+
+# Reprocess single photo
+python scripts/photo/reprocess_one_photo.py
+
+# Process uploads to color
+python scripts/photo/process_uploads_to_color.py
+```
+
+### Debugging
+
+```bash
+# Debug display
+python scripts/debug/debug_display.py
+
+# Debug photo manager
+python scripts/debug/debug_photo_manager.py
+
+# Debug Waveshare driver
+python scripts/debug/debug_waveshare.py
+
+# Debug color issues
+python scripts/debug/debug_color_issue.py
+```
+
+### Repairs
+
+```bash
+# Fix color photos
+python scripts/fix/fix_color_photos.py
+
+# Check BMP colors
+python scripts/fix/check_bmp_colors.py
+```
+
+## Running the Application
+
+### Development Mode (Simulation)
+
+```bash
+# Run with e-ink simulator
+python -m src.display.eink_simulator
+
+# Or import in code
+from src.display.eink_simulator import EInkSimulator
+display = EInkSimulator()
+display.init()
+```
+
+### Production Mode (Hardware)
+
+```bash
+# Run full application
+python run.py
+
+# Run only web interface
+python run.py --web-only
+
+# Run only display component
+python run.py --display-only
+
+# Run with debug mode
+python run.py --debug
+```
+
+## Weather Service Details
+
+### Weather.gov API Integration
+
+**Location Detection**:
+1. IP-based geolocation via ip-api.com (free, no auth)
+2. Configuration-based (city/state from config file)
+3. Fallback to McHenry, IL (42.3333° N, 88.6167° W)
+
+**API Endpoints Used**:
+- `GET /points/{lat},{lon}` - Get NWS grid information
+- `GET /gridpoints/{wfo},{x},{y}/forecast` - Get daily forecast
+- `GET /stations/{stationId}/observations/latest` - Get current conditions
+
+**Rate Limiting**:
+- 30-second minimum between API requests (NWS requirement)
+- Request caching to reduce API calls
+- Queue for rate-limited requests with retries
+
+**Data Format**:
+```python
+{
+    "current": {
+        "temp": 72,                    # Fahrenheit
+        "condition": "Partly Cloudy",
+        "description": "Partly Cloudy",
+        "humidity": 65,
+        "wind_speed": 8,
+        "feels_like": "N/A",
+        "icon": "https://api.weather.gov/icons/..."
+    },
+    "date": "June 15, 2025",
+    "has_alert": False,
+    "raw_data": {...}
+}
+```
+
+**Limitations**:
+- US locations only (weather.gov limitation)
+- No "feels like" temperature from NWS
+- 30-second rate limit enforced
+- Requires User-Agent header
+
+## Display Simulator
+
+### Purpose
+
+The e-ink display simulator allows testing and development without physical hardware by:
+- Saving display output to image files
+- Simulating refresh delays
+- Supporting all display types
+- Adding simulation metadata overlays
+
+### Usage
+
+```python
+from src.display.eink_simulator import EInkSimulator
+
+# Create simulator for specific display type
+display = EInkSimulator(display_type="7in5_V2", color_mode="grayscale")
+
+# Initialize
+display.init()
+
+# Display images
+display.display_image_buffer(image, force_refresh=True)
+
+# Clear
+display.clear()
+
+# Sleep mode
+display.sleep()
+
+# Get display info
+info = display.get_display_info()
+```
+
+### Output
+
+Simulated displays are saved as PNG files in the `simulation/` directory:
+- `<display_type>_display_<timestamp>.png` - Normal display
+- `<display_type>_clear_<timestamp>.png` - Cleared display
+- `<display_type>_sleep_<timestamp>.png` - Sleep mode
+
+Each output includes:
+- Timestamp of operation
+- Display type and mode
+- Refresh count
+- Operation type (display, clear, sleep)
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Display Not Initializing**
+   - Check GPIO/SPI with `tests/hardware/simple_test.py`
+   - Verify display model with `tests/hardware/check_model.py`
+   - Check physical connections
+
+2. **Weather Not Showing**
+   - Check logs for API errors
+   - Verify internet connection
+   - Check if outside US (weather.gov limitation)
+
+3. **Photos Not Displaying**
+   - Check photo directory configuration
+   - Verify photos are in correct format (BMP preferred)
+   - Check file permissions
+
+4. **Service Status Issues**
+   - Both `running` and `started` flags should be checked
+   - `running` = actively cycling
+   - `started` = initialized (may not be cycling)
+
+### Logs
+
+```bash
+# View application logs
+tail -f inkframe.log
+
+# Filter for specific components
+grep "weather" inkframe.log
+grep "display" inkframe.log
+grep "error" inkframe.log
+```
+
+## Testing Without Hardware
+
+When developing on a system without the e-ink display:
+
+1. **Use Simulator**: All display operations can be simulated
+   ```python
+   from src.display.eink_simulator import EInkSimulator
+   display = EInkSimulator()
+   display.init()
+   display.display_image_buffer(test_image)
+   ```
+
+2. **Check Output**: Review generated PNG files in `simulation/` directory
+
+3. **Test Web Interface**:
+   ```bash
+   python run.py --web-only
+   # Navigate to http://localhost:5000
+   ```
+
+4. **Run Unit Tests**:
+   ```bash
+   python tests/test_simulation.py
+   python tests/test_display.py
+   python tests/test_weather_api.py
+   ```
+
+## Version Management
+
+### Semantic Versioning
+
+Version format: **MAJOR.MINOR.PATCH** (e.g., 1.1.0)
+
+- **MAJOR** (X.0.0): Breaking changes, API changes, architectural overhauls
+  - Example: 1.5.2 → 2.0.0
+- **MINOR** (0.X.0): New features, significant enhancements (backwards compatible)
+  - Example: 1.5.2 → 1.6.0
+- **PATCH** (0.0.X): Bug fixes, minor tweaks, performance improvements (backwards compatible)
+  - Example: 1.5.2 → 1.5.3
+
+### Version Bump Workflow
+
+1. **Analyze Changes**: Review all changes in the branch
+2. **Categorize**: Determine if MAJOR, MINOR, or PATCH
+3. **Ask User**: Present analysis and get confirmation
+4. **Update Version**: Modify `src/version.py`
+5. **Update AGENTS.md**: Add version history entry
+6. **Commit**: Version bump commit
+
+### Decision Tree
+
+**MAJOR bump** - Use when:
+- Removing or renaming public components or APIs
+- Changing component props in breaking ways
+- Restructuring application architecture
+- Database schema changes requiring migration
+
+**MINOR bump** - Use when:
+- Adding new feature or component
+- Adding new props or options (backwards compatible)
+- Significant enhancement to existing feature
+- New API endpoints or services
+- New user-facing functionality
+
+**PATCH bump** - Use when:
+- Fixing bugs or errors
+- Correcting typos in UI text
+- Improving error messages or logging
+- CSS/styling fixes or adjustments
+- Performance optimizations (no API changes)
+
+**SKIP version bump** - Use when:
+- Updating documentation only
+- Modifying AGENTS.md or workflow files
+- File organization (chore:organize)
+- CI/CD configurations
+- .gitignore or similar tooling files
+
+## Known Limitations
+
+### Weather Service
+
+- US locations only (weather.gov provides US data only)
+- 30-second rate limit on API requests
+- No "feels like" temperature available
+- Some areas may lack nearby observation stations
+
+### Display Hardware
+
+- E-ink refresh takes 35+ seconds for full update
+- Limited grayscale/color capabilities
+- Partial refresh may cause ghosting artifacts
+- Power requirements during initialization
+
+### Location Detection
+
+- IP geolocation relies on external service availability
+- Fallback always to McHenry, IL if all detection fails
+- Location data cached in memory for session
+
+## Security Considerations
+
+- No sensitive data in weather.gov (public API)
+- User-Agent required by NWS for identification
+- API key not required (security benefit)
+- Location detection uses IP geolocation (privacy consideration)
+
+## Performance Optimization
+
+- Weather data cached for 30 minutes (configurable)
+- Display refresh minimized to conserve power
+- Images processed at upload time, not display time
+- BMP format preferred for faster e-ink rendering
+- Rate limiting on weather API to avoid bans
+
+## Maintenance Tasks
+
+Regular maintenance recommended:
+- Clear weather cache monthly: `python scripts/utils/clear_weather_cache.py`
+- Preprocess new photos: `python scripts/photo/preprocess_photos.py`
+- Check display hardware: `python tests/hardware/check_model.py`
+- Review logs for errors: `grep "error" inkframe.log`
+
+## Contact and Support
+
+For issues or questions:
+1. Check `troubleshooting.md` for common solutions
+2. Review logs for error messages
+3. Run hardware tests to verify functionality
+4. Test with e-ink simulator to reproduce issues
+5. Check GitHub issues for known problems

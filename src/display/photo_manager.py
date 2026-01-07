@@ -970,7 +970,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="InkFrame Photo Manager")
     parser.add_argument(
         "--mode",
-        choices=["photo", "clock", "info", "weather"],
+        choices=["photo", "info"],
         help="Display mode to test",
     )
     parser.add_argument("--photo", help="Specific photo to display")
@@ -992,11 +992,6 @@ if __name__ == "__main__":
             manager.display_current_mode(True)
             time.sleep(3)
 
-            manager.current_mode = DisplayMode.CLOCK
-            logger.info("Testing CLOCK mode")
-            manager.display_current_mode(True)
-            time.sleep(3)
-
             manager.current_mode = DisplayMode.INFO
             logger.info("Testing INFO mode")
             manager.display_current_mode(True)
@@ -1012,12 +1007,8 @@ if __name__ == "__main__":
             # Set display mode based on argument
             if args.mode == "photo":
                 manager.current_mode = DisplayMode.PHOTO
-            elif args.mode == "clock":
-                manager.current_mode = DisplayMode.CLOCK
             elif args.mode == "info":
                 manager.current_mode = DisplayMode.INFO
-            elif args.mode == "weather":
-                manager.current_mode = DisplayMode.WEATHER
 
             logger.info(f"Testing {args.mode.upper()} mode")
             manager.display_current_mode(True)

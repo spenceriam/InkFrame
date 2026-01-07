@@ -17,11 +17,12 @@ The project is in active development with the following components implemented:
 - Configuration management system
 
 Troubleshooting tools are available for hardware integration:
-- `simple_test.py` - Tests GPIO and SPI without initializing the display
-- `basic_test.py` - Minimal test for display initialization and clearing
-- `check_model.py` - Tests different display models for compatibility
-- `official_test.py` - Adapted from Waveshare's official examples
+- `tests/hardware/simple_test.py` - Tests GPIO and SPI without initializing the display
+- `tests/hardware/basic_test.py` - Minimal test for display initialization and clearing
+- `tests/hardware/check_model.py` - Tests different display models for compatibility
+- `tests/hardware/official_test.py` - Adapted from Waveshare's official examples
 - `troubleshooting.md` - Comprehensive guide for hardware issues
+- See `tests/README.md` for complete test documentation
 
 ## Architecture
 
@@ -66,23 +67,32 @@ python run.py --debug
 
 ```bash
 # Test GPIO and SPI communication
-python simple_test.py
+python tests/hardware/simple_test.py
 
 # Test basic display functionality
-python basic_test.py
+python tests/hardware/basic_test.py
 
 # Find compatible display model
-python check_model.py
+python tests/hardware/check_model.py
 
 # Run official Waveshare test
-python official_test.py
+python tests/hardware/official_test.py
 ```
+
+See `tests/README.md` for comprehensive testing documentation.
 
 ### Running Tests
 
 ```bash
 # Run simulation test (works on non-Raspberry Pi systems)
 python tests/test_simulation.py
+
+# Run unit tests
+python tests/test_display.py
+python tests/test_photo_manager.py
+python tests/test_weather_api.py
+
+# See tests/README.md for all available tests
 ```
 
 ## Development Notes

@@ -147,13 +147,13 @@ If you're using the 7.3 inch ACeP 7-color display instead of the 7.5 inch B&W di
 1. Determine your exact display model:
    ```
    cd ~/InkFrame
-   python check_model.py
+   python tests/hardware/check_model.py
    ```
    This script will test different display models and identify which one works with your hardware.
 
 2. Run the color-specific test script:
    ```
-   python color_test.py
+   python tests/color/color_test.py
    ```
    This will display a color test pattern showing all 7 available colors.
 

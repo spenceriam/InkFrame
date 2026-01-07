@@ -15,7 +15,8 @@ A minimal, elegant digital photo frame using a Raspberry Pi Zero W and Waveshare
 - **Web Interface**: Simple browser-based management interface for photos and settings
 - **Lightweight Design**: Optimized for Raspberry Pi Zero W's limited resources
 - **Automatic Startup**: Launches on boot via systemd services
-- **Weather Integration**: Real-time weather data via OpenWeatherMap API
+- **Weather Integration**: Real-time weather data via weather.gov public API (US locations)
+- **Date Display**: Current date shown in status bar
 - **Flexible Image Handling**: Supports JPG, PNG, BMP, and HEIC formats
 
 ## Hardware Requirements
@@ -84,10 +85,15 @@ For detailed instructions and documentation, see:
 
 ## Weather Setup
 
-InkFrame uses OpenWeatherMap for weather data. You'll need to:
+InkFrame uses the weather.gov public API for weather data. The service automatically:
 
-1. Sign up for a free API key at [OpenWeatherMap](https://openweathermap.org/api)
-2. Enter your API key and location in the web interface settings
+1. Detects your location via IP geolocation
+2. Falls back to configured location if set
+3. Defaults to McHenry, IL if location cannot be determined
+
+**Note**: weather.gov provides weather data for US locations only. No API key is required.
+
+You can manually set your location in the web interface settings if needed.
 
 ## Development
 
@@ -120,4 +126,4 @@ MIT
 - [Waveshare](https://www.waveshare.com/) for their e-Paper display and library
 - [Flask](https://flask.palletsprojects.com/) for the web framework
 - [Pillow](https://python-pillow.org/) for image processing
-- [OpenWeatherMap](https://openweathermap.org/) for weather data API
+- [weather.gov](https://www.weather.gov/) for public weather data API

@@ -285,13 +285,126 @@ Follow conventional commits:
 - `chore:organize:` - File organization
 - `test:organize:` - Test file reorganization
 
-**Version Bump Workflow**:
-Before creating PR:
-1. Review changes and categorize (MAJOR.MINOR.PATCH)
-2. Ask user for version bump confirmation
-3. Update `src/version.py`
-4. Update AGENTS.md version history
-5. Commit with version bump
+## Version Management
+
+### Semantic Versioning Format
+
+Version format: **MAJOR.MINOR.PATCH** (e.g., 1.1.0)
+
+- **MAJOR** (X.0.0): Breaking changes, API changes, architectural overhauls
+  - Example: 1.5.2 → 2.0.0
+- **MINOR** (0.X.0): New features, significant enhancements (backwards compatible)
+  - Example: 1.5.2 → 1.6.0
+- **PATCH** (0.0.X): Bug fixes, minor tweaks, performance improvements (backwards compatible)
+  - Example: 1.5.2 → 1.5.3
+
+### Decision Tree for Version Bumping
+
+**MAJOR bump (X.0.0)** - Use when:
+- Removing or renaming public components or APIs
+- Changing component props in breaking ways
+- Restructuring application architecture
+- Database schema changes requiring migration
+- Any change that requires users/developers to modify their code
+
+**MINOR bump (0.X.0)** - Use when:
+- Adding new feature or component
+- Adding new props or options (backwards compatible)
+- Significant enhancement to existing feature
+- New API endpoints or services
+- New user-facing functionality
+
+**PATCH bump (0.0.X)** - Use when:
+- Fixing bugs or errors
+- Correcting typos in UI text
+- Improving error messages or logging
+- CSS/styling fixes or adjustments
+- Performance optimizations (no API changes)
+- Accessibility improvements
+- Security patches
+
+**SKIP version bump** - Use when:
+- Updating documentation only (README, comments)
+- Modifying AGENTS.md or workflow files
+- File organization (chore:organize)
+- CI/CD configurations
+- .gitignore or similar tooling files
+
+### AI Agent Workflow for Version Bumping
+
+**Step 1: Analyze Changes**
+Before creating a PR, review all changes in the branch and categorize them.
+
+**Step 2: Ask User for Confirmation**
+Present your analysis to the user and ask for confirmation:
+```
+Based on the changes in this branch, I've identified:
+- [List key changes]
+
+I recommend a [PATCH/MINOR/MAJOR] version bump because [reasoning].
+
+Current version: X.Y.Z
+Proposed version: X.Y.Z
+
+Does this classification seem correct? Should I proceed with this version bump?
+```
+
+**Step 3: Apply Version Bump**
+After user confirmation:
+1. Update `src/version.py` with new version
+2. Update AGENTS.md version history section
+3. Commit with message: `chore: bump version to X.Y.Z`
+
+**Step 4: Document in PR**
+- Update PR title to include new version
+- Mention version bump and reasoning in PR description
+- List what changed to justify the bump type
+
+### Version Bump Examples
+
+**PATCH: 1.1.0 → 1.1.1**
+- "Fix missing ImageFont import in simulator"
+- "Correct weather data format mismatch"
+- "Remove dead code references"
+
+**MINOR: 1.1.1 → 1.2.0**
+- "Add new /api/status endpoint"
+- "Add color display support"
+- "Implement photo upload preprocessing"
+
+**MAJOR: 1.2.0 → 2.0.0**
+- "Migrate from OpenWeatherMap to weather.gov API" (breaking config changes)
+- "Redesign display driver architecture"
+- "Change configuration file format"
+
+### Integration with Workflow
+
+Version bumping happens IN the feature branch, BEFORE creating the PR:
+
+1. Create feature branch: `git checkout -b feature/description`
+2. Make changes and test thoroughly
+3. **Analyze changes and ask user about version bump type**
+4. **Apply version bump** (update version.py and AGENTS.md)
+5. Push branch: `git push`
+6. Create PR with version noted in title/description
+7. User reviews and merges to main
+
+### Verification Commands
+
+```bash
+# Check current version
+cat src/version.py | grep __version__
+
+# View recent version bumps in git log
+git log --oneline --grep="version" -10
+```
+
+### Human Override
+
+Users can always override AI agent version decisions:
+- Manually edit `src/version.py`
+- Document reasoning in PR comments
+- AI agents should defer to user judgment when corrected
 
 ### Code Review Checklist
 
@@ -395,30 +508,50 @@ inkframe/
 
 ## API Reference
 
-### Display Service Status
+### Application Status
 
 GET `/api/status`
 
-Returns:
+Returns high-level application status including version:
 ```json
 {
   "display": {
-    "running": true,
-    "started": true,
     "photo_count": 10,
-    "current_index": 3,
-    "display_mode": "sequential",
-    "cycle_interval": 300,
-    "weather_enabled": true
+    "display_type": "7in5_V2",
+    "color_mode": "grayscale",
+    "rotation_interval": 60
   },
   "weather": {
     "available": true,
     "temperature": "72°F",
     "condition": "Partly Cloudy",
-    "date": "June 15, 2025"
+    "date": "January 7, 2026"
   },
-  "version": "1.1.0",
-  "timestamp": "2025-06-15T14:30:00"
+  "version": "1.1.1",
+  "timestamp": "2026-01-07T14:30:00"
+}
+```
+
+### System Status
+
+GET `/api/system/status`
+
+Returns detailed system information (disk, CPU, uptime):
+```json
+{
+  "status": {
+    "disk": {
+      "total": "32.00 GB",
+      "used": "4.50 GB",
+      "free": "27.50 GB",
+      "percent_used": 14.1
+    },
+    "uptime": 86400,
+    "cpu_temp": "45.2°C",
+    "display_running": true,
+    "photo_count": 10,
+    "timestamp": "2026-01-07T14:30:00"
+  }
 }
 ```
 

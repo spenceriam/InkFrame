@@ -373,42 +373,47 @@ class PhotoManager:
             # Get any weather alerts if available
             has_alert = weather_data.get("has_alert", False)
 
-            # Draw weather centered (since no time on left)
-            weather_text = f"{temp}{unit_symbol} - {condition}"
-            if has_alert:
-                weather_text = "⚠️ " + weather_text  # Add alert indicator
-
-            text_bbox = self.font.getbbox(weather_text)
-            text_width = text_bbox[2] - text_bbox[0]
-            text_x = (width - text_width) // 2
-            draw.text((text_x, 9), weather_text, font=self.font, fill=fg_color)
-
-            # Get and display current date to the right of weather
-            date_str = weather_data.get("date", datetime.now().strftime("%B %d, %Y"))
-            date_bbox = self.font_small.getbbox(date_str)
-            date_width = date_bbox[2] - date_bbox[0]
-            date_x = text_x + text_width + 15  # Position after weather text
-            draw.text((date_x, 11), date_str, font=self.font_small, fill=fg_color)
-
-            # Add version display in ghost text at bottom left
-            version_str = get_version()
-            version_text = f"v{version_str}"
-            version_bbox = self.font_small.getbbox(version_text)
-            version_x = 5
-            version_y = height - 25
-
             # Use lighter color for ghost text effect
             if self.display.is_color_display:
                 ghost_color = (200, 200, 200)  # Light gray for color display
             else:
                 ghost_color = 200  # Light gray for B&W/grayscale
 
-            draw.text(
-                (version_x, version_y),
-                version_text,
-                font=self.font_small,
-                fill=ghost_color,
-            )
+            # Calculate vertical center for all text
+            text_y = (height - self.font.size) // 2 + 2  # Adjust for visual centering
+
+            # 1. VERSION (left side, ghost text)
+            version_str = get_version()
+            version_text = f"v{version_str}"
+            version_x = 10
+            draw.text((version_x, text_y), version_text, font=self.font, fill=ghost_color)
+
+            # Get version width for spacing calculations
+            version_bbox = self.font.getbbox(version_text)
+            version_width = version_bbox[2] - version_bbox[0]
+
+            # 2. DATE (right side, normal text)
+            date_str = weather_data.get("date", datetime.now().strftime("%B %d, %Y"))
+            date_bbox = self.font.getbbox(date_str)
+            date_width = date_bbox[2] - date_bbox[0]
+            date_x = width - date_width - 10  # 10px from right edge
+            draw.text((date_x, text_y), date_str, font=self.font, fill=fg_color)
+
+            # 3. WEATHER (centered in remaining space between version and date)
+            weather_text = f"{temp}{unit_symbol} - {condition}"
+            if has_alert:
+                weather_text = "⚠️ " + weather_text
+
+            weather_bbox = self.font.getbbox(weather_text)
+            weather_width = weather_bbox[2] - weather_bbox[0]
+
+            # Center weather in the space between version and date
+            available_start = version_x + version_width + 20  # 20px after version
+            available_end = date_x - 20  # 20px before date
+            available_width = available_end - available_start
+            weather_x = available_start + (available_width - weather_width) // 2
+
+            draw.text((weather_x, text_y), weather_text, font=self.font, fill=fg_color)
         else:
             # Draw placeholder if no weather (centered)
             no_weather_text = "Weather unavailable"

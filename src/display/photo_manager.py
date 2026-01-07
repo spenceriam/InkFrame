@@ -363,11 +363,12 @@ class PhotoManager:
         if weather_data:
             # Format temperature based on units (default to Celsius)
             units = self.config["weather"].get("units", "metric")
-            temp = weather_data.get("temp", "N/A")
+            current = weather_data.get("current", {})
+            temp = current.get("temp", "N/A")
             unit_symbol = "°C" if units == "metric" else "°F"
 
             # Get weather condition
-            condition = weather_data.get("condition", "Unknown")
+            condition = current.get("condition", "Unknown")
 
             # Get any weather alerts if available
             has_alert = weather_data.get("has_alert", False)
@@ -506,11 +507,12 @@ class PhotoManager:
         if weather_data:
             # Format temperature based on units (default to Celsius)
             units = self.config["weather"].get("units", "metric")
-            temp = weather_data.get("temp", "N/A")
+            current = weather_data.get("current", {})
+            temp = current.get("temp", "N/A")
             unit_symbol = "°C" if units == "metric" else "°F"
 
             # Get weather condition and icon if available
-            condition = weather_data.get("condition", "Unknown")
+            condition = current.get("condition", "Unknown")
 
             # Format weather text
             weather_text = f"{temp}{unit_symbol} - {condition}"
@@ -662,14 +664,15 @@ class PhotoManager:
 
             # Basic weather info
             units = self.config["weather"].get("units", "metric")
-            temp = weather_data.get("temp", "N/A")
+            current = weather_data.get("current", {})
+            temp = current.get("temp", "N/A")
             unit_symbol = "°C" if units == "metric" else "°F"
-            condition = weather_data.get("condition", "Unknown")
+            condition = current.get("condition", "Unknown")
 
             weather_lines = [
                 f"Current: {temp}{unit_symbol} - {condition}",
-                f"Humidity: {weather_data.get('humidity', 'N/A')}%",
-                f"Wind: {weather_data.get('wind_speed', 'N/A')} {weather_data.get('wind_direction', '')}",
+                f"Humidity: {current.get('humidity', 'N/A')}%",
+                f"Wind: {current.get('wind_speed', 'N/A')} {current.get('wind_direction', '')}",
             ]
 
             for line in weather_lines:

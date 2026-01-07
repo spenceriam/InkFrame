@@ -20,7 +20,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional, Tuple
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
 logger = logging.getLogger(__name__)
 

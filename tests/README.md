@@ -23,9 +23,11 @@ tests/
 │   ├── official_test.py              # Waveshare official test adaptation
 │   ├── check_model.py                # Display model compatibility checker
 │   ├── lgpio_test.py                 # lgpio library test
-│   └── lgpio_reset_test.py           # GPIO reset test
+│   ├── lgpio_reset_test.py           # GPIO reset test
+│   └── pin_check.py                  # GPIO interface availability checker
 └── color/                             # Color display specific tests
-    └── color_test.py                 # ACeP 7-color display test
+    ├── color_test.py                 # ACeP 7-color display test
+    └── color_display_test.py         # 7.3 inch ACeP 7-color e-ink display test
 ```
 
 ## Test Categories
@@ -154,6 +156,8 @@ python tests/hardware/official_test.py
 ```bash
 python tests/hardware/lgpio_test.py
 python tests/hardware/lgpio_reset_test.py
+
+python tests/hardware/pin_check.py
 ```
 
 ### Color Display Tests (`tests/color/`)
@@ -161,6 +165,7 @@ python tests/hardware/lgpio_reset_test.py
 These tests are specific to ACeP 7-color displays:
 
 - `color_test.py` - Full color display test with all 7 colors
+- `color_display_test.py` - 7.3 inch ACeP 7-color e-ink display test
 
 **When to Use**:
 - Testing ACeP 7-color displays
@@ -216,6 +221,15 @@ python tests/test_color_pipeline.py
 python tests/test_weather_api.py
 python tests/test_save_canvas.py
 
+# Run hardware tests (requires RPi)
+python tests/hardware/simple_test.py
+python tests/hardware/basic_test.py
+python tests/hardware/check_model.py
+python tests/hardware/official_test.py
+python tests/hardware/lgpio_test.py
+python tests/hardware/lgpio_reset_test.py
+python tests/hardware/pin_check.py
+
 # Run integration tests
 python tests/test_full_display.py
 python tests/test_display_colors.py
@@ -239,6 +253,11 @@ When developing on a system without the e-ink display hardware:
 3. Test web interface:
    ```bash
    python run.py --web-only
+   ```
+
+4. Check available GPIO interfaces:
+   ```bash
+   python tests/hardware/pin_check.py
    ```
 
 ## Writing New Tests

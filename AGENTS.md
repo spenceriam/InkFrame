@@ -60,7 +60,9 @@ The project follows a modular architecture:
   - `app.py`: Flask application and API endpoints
 
 - **src/weather/**: Weather data integration
-  - `weather_client.py`: Weather.gov API client
+  - `weather_client.py`: Weather.gov API client (active)
+  - `weather_client_free.py`: Legacy OpenWeatherMap free tier client (unused)
+  - `weather_client_onecall.py`: Legacy OpenWeatherMap OneCall client (unused)
 
 - **src/utils/**: Shared utilities
   - `image_processor.py`: Image optimization for e-ink
@@ -443,7 +445,10 @@ inkframe/
 │   ├── web/
 │   │   └── app.py
 │   ├── weather/
-│   │   └── weather_client.py
+│   │   ├── __init__.py
+│   │   ├── weather_client.py
+│   │   ├── weather_client_free.py
+│   │   └── weather_client_onecall.py
 │   ├── utils/
 │   │   ├── config_manager.py
 │   │   └── image_processor.py
@@ -496,11 +501,11 @@ inkframe/
 │   └── fix/
 │       ├── fix_color_photos.py
 │       └── check_bmp_colors.py
-├── templates/
-│   └── index.html
 ├── static/
 │   ├── css/
 │   ├── js/
+│   ├── templates/
+│   │   └── index.html
 │   └── images/
 │       └── photos/
 ├── config/

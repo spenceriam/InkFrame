@@ -2,9 +2,14 @@
 """
 Manual script to clear the e-ink display
 """
+import os
 import sys
 import time
 import logging
+
+# Add project root to path for imports
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.insert(0, project_root)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

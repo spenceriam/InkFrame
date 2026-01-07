@@ -8,9 +8,21 @@ InkFrame is a digital photo frame application designed for Raspberry Pi Zero W w
 
 ## Current Version
 
-Version: 1.1.1
+Version: 1.1.1 (v1.2.0 in development on `web-interface-improvements` branch)
 
 ## Version History
+
+### v1.2.0 (In Development) - 2026-01-XX
+- **NEW**: Interactive map-based location picker using Leaflet
+- **NEW**: ZIP code and city name search for location geocoding
+- **NEW**: Geocoding API endpoints (`/api/location/geocode`, `/api/location/reverse`)
+- **NEW**: Stored coordinates (latitude/longitude) in config for precise location
+- **REMOVED**: OpenWeatherMap API key field (obsolete since v1.1.0)
+- **REMOVED**: Country code field (weather.gov is US-only)
+- **IMPROVED**: Weather client prioritizes stored coordinates over geocoding
+- **IMPROVED**: Auto-migration of legacy city/state configs to coordinates
+- **UI**: Streamlined weather settings interface
+- **DOCS**: Added `docs/web-interface-improve.md` implementation plan
 
 ### v1.1.1 (Current) - 2026-01-07
 - **FIXED**: Missing ImageFont import in e-ink simulator
@@ -142,13 +154,19 @@ Both flags should be checked to determine the true service state.
 ### Weather Integration
 
 The application uses the weather.gov API:
-- Location is determined via IP geolocation or config
+- Location is determined via stored coordinates, geocoding, or IP geolocation
 - Falls back to McHenry, IL if detection fails
 - API requires User-Agent header with contact info
 - Returns temperature, conditions, and current date
 - Only covers US locations
 
-**Location Detection Strategy**:
+**Location Detection Strategy (v1.2.0+)**:
+1. Stored coordinates (primary) - User-set latitude/longitude via map picker
+2. Geocode city/state (secondary) - For legacy config migration
+3. IP-based geolocation (tertiary) - Uses ip-api.com
+4. Hardcoded fallback (quaternary) - McHenry, IL coordinates
+
+**Location Detection Strategy (v1.1.x)**:
 1. IP-based geolocation (primary) - Uses ip-api.com
 2. Configuration-based (secondary) - Reads city/state from config
 3. Hardcoded fallback (tertiary) - McHenry, IL coordinates

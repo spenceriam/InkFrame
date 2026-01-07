@@ -1,5 +1,7 @@
 # AGENTS.md
 
+> **⚠️ IMPORTANT FOR AI AGENTS**: Always review this documentation FIRST before any action such as reviewing the codebase, making changes, git operations, debugging, or any development work. This is your primary reference.
+
 This file provides guidance to AI agents and developers when working with code in this repository.
 
 ## Project Overview
@@ -374,6 +376,19 @@ Follow conventional commits:
 - `chore:` - Maintenance tasks
 - `chore:organize:` - File organization
 - `test:organize:` - Test file reorganization
+
+### Git Workflow Rules
+
+**Commit Timing:**
+- Git commits SHOULD occur after each task or fix is complete
+- Keep commits atomic and focused on a single change
+- Use descriptive commit messages following the format above
+
+**Push Policy:**
+- **CRITICAL**: Git push will NEVER happen automatically
+- **ALWAYS** ask for user approval before pushing to remote
+- Present a summary of commits to be pushed before requesting approval
+- Wait for explicit user confirmation (e.g., "yes", "push it", "go ahead")
 
 ## Version Management
 

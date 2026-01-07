@@ -17,7 +17,7 @@
     "city": "",
     "state": "",
     "country": "",
-    "units": "metric",
+    "units": "imperial",
     "update_interval_minutes": 30,
     "cache_expiry_minutes": 120
   },
@@ -25,6 +25,7 @@
     "timezone": "UTC",
     "web_port": 5000,
     "debug_mode": false,
-    "log_level": "INFO"
+    "log_level": "INFO",
+    "simulation_mode": false
   }
 }

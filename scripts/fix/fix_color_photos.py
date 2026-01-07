@@ -3,7 +3,13 @@
 Fix the grayscale BMPs by reprocessing from originals
 """
 import os
+import sys
 import shutil
+
+# Add project root to path for imports
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.insert(0, project_root)
+
 from src.utils.image_processor import ImageProcessor
 
 print("=== Fixing Color Photos ===\n")

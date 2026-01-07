@@ -22,6 +22,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from src.utils.config_manager import ConfigManager
 from src.utils.image_processor import ImageProcessor
 from src.weather.weather_client import WeatherClient
+from src.version import get_version
 
 # Configure logging
 logging.basicConfig(
@@ -294,6 +295,45 @@ def refresh_weather():
     except Exception as e:
         logger.error(f"Error refreshing weather: {e}")
         return jsonify({'error': 'Failed to refresh weather data'}), 500
+
+@app.route('/api/status', methods=['GET'])
+def get_status():
+    """Get the current application status including version, weather, and display info"""
+    try:
+        # Get weather data
+        weather_status = {}
+        try:
+            weather = weather_client.get_weather()
+            if weather:
+                current = weather.get('current', {})
+                weather_status = {
+                    'available': True,
+                    'temperature': f"{current.get('temp', 'N/A')}°F",
+                    'condition': current.get('condition', 'Unknown'),
+                    'date': weather.get('date', 'Unknown')
+                }
+            else:
+                weather_status = {'available': False, 'error': 'Weather data unavailable'}
+        except Exception as e:
+            weather_status = {'available': False, 'error': str(e)}
+        
+        # Get display info
+        display_status = {
+            'photo_count': len(glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*.*'))),
+            'display_type': config.get('display', {}).get('type', '7in5_V2'),
+            'color_mode': config.get('display', {}).get('color_mode', 'grayscale'),
+            'rotation_interval': config.get('display', {}).get('rotation_interval_minutes', 60)
+        }
+        
+        return jsonify({
+            'display': display_status,
+            'weather': weather_status,
+            'version': get_version(),
+            'timestamp': datetime.now().isoformat()
+        })
+    except Exception as e:
+        logger.error(f"Error getting status: {e}")
+        return jsonify({'error': 'Failed to get status'}), 500
 
 @app.route('/api/system/status', methods=['GET'])
 def get_system_status():

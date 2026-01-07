@@ -2,6 +2,33 @@
 
 All notable changes to the InkFrame project will be documented in this file.
 
+## [1.1.0] - 2025-06-15
+
+### Added
+- Migrated from OpenWeatherMap to weather.gov API for weather data
+- IP-based geolocation to automatically determine weather location
+- Current date display in status bar (Month Day, Year format)
+- Version number display in ghost text on bottom left of screen
+- AGENTS.md file for AI agent guidance
+- Tests/README.md with comprehensive testing documentation
+- Version management system with src/version.py
+
+### Changed
+- Reorganized all test files into tests/ directory structure
+- Moved hardware diagnostic scripts to tests/hardware/
+- Moved color display tests to tests/color/
+- Updated all documentation references to new test file paths
+- Enhanced display service status reporting with 'started' flag
+
+### Fixed
+- Display service reporting as "not started" when it was actually running
+- Weather client location detection now has proper fallback mechanism
+- Test file organization - all tests now properly categorized
+
+### Dependencies
+- Removed OpenWeatherMap API dependency
+- No new dependencies required
+
 ## [0.1.2] - 2025-05-23
 
 ### Added

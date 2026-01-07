@@ -2,6 +2,13 @@
 """
 Debug photo manager settings
 """
+import os
+import sys
+
+# Add project root to path for imports
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.insert(0, project_root)
+
 from src.display.photo_manager import PhotoManager
 
 pm = PhotoManager()

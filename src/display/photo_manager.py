@@ -45,18 +45,24 @@ class PhotoManager:
     on the e-ink display, handling rotation timing, layout, and content selection.
     """
 
-    def __init__(self, config_path="config/config.json"):
+    def __init__(self, config_path="config/config.json", display_instance=None):
         """Initialize the photo manager
 
         Args:
             config_path (str): Path to configuration file
+            display_instance (Optional): Display instance (EInkDisplay or EInkSimulator)
         """
         self.config = self._load_config(config_path)
 
-        # Initialize display with display type and color mode from config
-        display_type = self.config["display"].get("type", "7in5_V2")
-        color_mode = self.config["display"].get("color_mode", "grayscale")
-        self.display = EInkDisplay(display_type=display_type, color_mode=color_mode)
+        # Use provided display instance or create new one
+        if display_instance is None:
+            # Initialize display with display type and color mode from config
+            display_type = self.config["display"].get("type", "7in5_V2")
+            color_mode = self.config["display"].get("color_mode", "grayscale")
+            self.display = EInkDisplay(display_type=display_type, color_mode=color_mode)
+        else:
+            # Use provided display instance (simulator or real)
+            self.display = display_instance
 
         self.weather_client = WeatherClient(self.config)
 

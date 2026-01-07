@@ -92,12 +92,12 @@ def main():
         "--display-only", action="store_true", help="Run only the display component"
     )
     parser.add_argument(
+        "--port", type=int, default=5000, help="Web interface port (default: 5000)"
+    )
+    parser.add_argument(
         "--simulation",
         action="store_true",
         help="Run in simulation mode (no hardware required)",
-    )
-    parser.add_argument(
-        "--port", type=int, default=5000, help="Web interface port (default: 5000)"
     )
     parser.add_argument("--debug", action="store_true", help="Enable debug mode")
 

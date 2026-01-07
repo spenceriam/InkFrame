@@ -116,79 +116,54 @@ def test_photo_manager():
     # Initialize the simulator
     assert display_simulator.init(), "Simulator initialization failed"
 
-    # Initialize photo manager with simulator instead of real display
-    photo_manager = PhotoManager(display_instance=display_simulator)
+    # Test random photo selection
+    photo = photo_manager.get_random_photo()
+    assert photo is not None, "Failed to get a random photo"
+    logger.info(f"Selected photo: {photo}")
 
+    # Test display
+    assert photo_manager.display_photo(photo), "Failed to display photo"
+    logger.info("PhotoManager test passed")
 
-# Create e-ink simulator instance for testing
-from src.display.eink_simulator import EInkSimulator
-
-logger.info("Creating e-ink display simulator...")
-display_simulator = EInkSimulator(display_type="7in5_V2", color_mode="grayscale")
-
-# Initialize the simulator
-assert display_simulator.init(), "Simulator initialization failed"
-
-# Initialize photo manager with simulator instance
-# Initialize photo manager with simulator instead of real display
-photo_manager = PhotoManager(display_instance=display_simulator)
-
-# Test random photo selection
-photo = photo_manager.get_random_photo()
-assert photo is not None, "Failed to get a random photo"
-logger.info(f"Selected photo: {photo}")
-
-# Test display
-assert photo_manager.display_photo(photo), "Failed to display photo"
-
-logger.info("PhotoManager test passed")
 
 def test_weather_client():
-"""Test weather.gov client integration"""
-logger.info("Testing Weather.gov client...")
+    """Test weather.gov client integration"""
+    logger.info("Testing Weather.gov client...")
 
-from src.weather.weather_client import WeatherClient
+    from src.weather.weather_client import WeatherClient
 
-# Create minimal config for testing
-test_config = {
-    "display": {
-        "rotation_interval_minutes": 60,
-        "status_bar_height": 40
-    },
-    "photos": {
-        "directory": "static/images/photos",
-        "max_width": 800,
-        "max_height": 440
-    },
-    "weather": {
-        "update_interval_minutes": 30,
-        "cache_expiry_minutes": 120
-    },
-    "system": {
-        "timezone": "UTC",
-        "web_port": 5000,
-        "debug_mode": False
+    # Create minimal config for testing
+    test_config = {
+        "display": {"rotation_interval_minutes": 60, "status_bar_height": 40},
+        "photos": {
+            "directory": "static/images/photos",
+            "max_width": 800,
+            "max_height": 440,
+        },
+        "weather": {"update_interval_minutes": 30, "cache_expiry_minutes": 120},
+        "system": {"timezone": "UTC", "web_port": 5000, "debug_mode": False},
     }
-}
 
-# Test with default location (McHenry, IL)
-weather_client = WeatherClient(test_config)
+    # Test with default location (McHenry, IL)
+    weather_client = WeatherClient(test_config)
 
-# Get weather data
-weather = weather_client.get_weather()
+    # Get weather data
+    weather = weather_client.get_weather()
 
-assert weather is not None, "Weather client returned None"
-assert "current" in weather, "Weather data missing 'current' key"
-assert "temp" in weather["current"], "Temperature not in weather data"
-assert "condition" in weather["current"], "Weather condition not in weather data"
+    assert weather is not None, "Weather client returned None"
+    assert "current" in weather, "Weather data missing 'current' key"
+    assert "temp" in weather["current"], "Temperature not in weather data"
+    assert "condition" in weather["current"], "Weather condition not in weather data"
 
-logger.info(f"Weather: {weather['current']['temp']}°{weather['current'].get('unit', 'F')} - {weather['current']['condition']}")
+    logger.info(
+        f"Weather: {weather['current']['temp']}°{weather['current'].get('unit', 'F')} - {weather['current']['condition']}"
+    )
 
-# Check if date is included
-assert "date" in weather, "Date not in weather data"
-logger.info(f"Date: {weather['date']}")
+    # Check if date is included
+    assert "date" in weather, "Date not in weather data"
+    logger.info(f"Date: {weather['date']}")
 
-logger.info("Weather.gov client test passed")
+    logger.info("Weather.gov client test passed")
 
 
 def main():

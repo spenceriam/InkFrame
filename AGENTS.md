@@ -8,11 +8,21 @@ InkFrame is a digital photo frame application designed for Raspberry Pi Zero W w
 
 ## Current Version
 
-Version: 1.1.0
+Version: 1.1.1
 
 ## Version History
 
-### v1.1.0 (Current) - 2025-06-15
+### v1.1.1 (Current) - 2026-01-07
+- **FIXED**: Missing ImageFont import in e-ink simulator
+- **FIXED**: Orphaned code in test_simulation.py running at import time
+- **FIXED**: Weather data format mismatch (nested 'current' dictionary access)
+- **FIXED**: Dead DisplayMode.CLOCK and WEATHER references in CLI
+- **FIXED**: Script imports from scripts/ subdirectories
+- **ADDED**: /api/status endpoint with version info
+- **CLEANED**: Duplicate code in test_simulation.py
+- **DOCS**: Clarified API endpoint documentation
+
+### v1.1.0 - 2025-06-15
 - **BREAKING**: Migrated from OpenWeatherMap to weather.gov API
   - No API key required
   - US locations only (weather.gov limitation)

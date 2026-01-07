@@ -7,14 +7,14 @@ This module follows semantic versioning: MAJOR.MINOR.PATCH
 - PATCH: Bug fixes, typos, minor tweaks, performance improvements (backwards compatible)
 """
 
-__version__ = "1.1.0"
-__version_info__ = (1, 1, 0)
+__version__ = "1.1.1"
+__version_info__ = (1, 1, 1)
 
 # Version metadata
 VERSION_MAJOR = 1
 VERSION_MINOR = 1
-VERSION_PATCH = 0
-VERSION_STRING = "1.1.0"
+VERSION_PATCH = 1
+VERSION_STRING = "1.1.1"
 VERSION_FULL = f"InkFrame v{VERSION_STRING}"
 
 

@@ -121,6 +121,8 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 MIT
 
+[sbp]
+
 ## Acknowledgments
 
 - [Waveshare](https://www.waveshare.com/) for their e-Paper display and library
